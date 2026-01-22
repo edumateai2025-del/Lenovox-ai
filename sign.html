@@ -1,1 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lenovox-ai – Sign in or sign up</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(160deg, #061a40 0%, #2b0f3f 100%);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 40px 24px 60px;
+      transition: background 0.5s;
+    }
+    .logo-container { text-align: center; margin-top: 80px; }
+    .logo { font-size: 50px; font-weight: 600; letter-spacing: -1px; margin-bottom: 12px; }
+    .circle { display: inline-block; width: 18px; height: 18px; background: linear-gradient(135deg, #ffb347, #ffcc33); border-radius: 50%; vertical-align: middle; margin-left: 4px; margin-bottom: 4px; }
+    .typing-text { font-size: 24px; font-weight: 500; opacity: 0.95; min-height: 36px; margin-top: 12px; letter-spacing: 0.4px; position: relative; }
+    .typing-text::after { content: "|"; margin-left: 4px; animation: blink 1s infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+    .buttons, .email-form-container { width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 14px; margin-top: 60px; }
+    .btn {
+      background: rgba(255, 255, 255, 0.12);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      padding: 16px;
+      font-size: 17px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: background 0.25s ease, transform 0.2s ease;
+      text-decoration: none;
+    }
+    .btn:hover { background: rgba(255, 255, 255, 0.18); transform: translateY(-1px); }
+    .btn-icon { width: 26px; height: 26px; object-fit: contain; transition: transform 0.35s ease, filter 0.35s ease; }
+    .btn:hover .btn-icon { transform: rotate(-8deg) scale(1.15); filter: brightness(1.1); }
+    .login-btn { background: transparent; border: 1px solid rgba(255,255,255,0.35); margin-top: 20px; }
+    .login-btn:hover { background: rgba(255,255,255,0.1); }
+    .safe-area-bottom { height: 40px; }
+    .indicator { width: 135px; height: 5px; background: rgba(255,255,255,0.45); border-radius: 999px; margin: 0 auto; }
+    .email-form-container {
+      display: none;
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(15px);
+      border-radius: 20px;
+      padding: 40px 24px;
+      text-align: center;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      position: relative;
+    }
+    .email-form-container h2 { margin: 16px 0 30px; font-weight: 500; font-size: 22px; color: #ffffffcc; }
+    .email-form-container form { display: flex; flex-direction: column; gap: 16px; }
+    .email-form-container input {
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: none;
+      font-size: 16px;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      outline: none;
+      transition: background 0.2s;
+    }
+    .email-form-container input::placeholder { color: #ffffffaa; }
+    .email-form-container input:focus { background: rgba(255,255,255,0.2); }
+    .btn-submit {
+      padding: 16px;
+      border-radius: 12px;
+      border: none;
+      font-size: 18px;
+      font-weight: 500;
+      background-color: #f5a623;
+      color: #0a3d62;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-submit:hover { background-color: #ffbe3c; }
+    .forgot-password { margin-top: 12px; font-size: 14px; color: #ffffff99; cursor: pointer; text-decoration: underline; transition: color 0.2s; }
+    .forgot-password:hover { color: #f5a623; }
+    .back-btn { position: absolute; top: 16px; left: 16px; background: transparent; border: none; color: #f5a623; font-size: 16px; cursor: pointer; font-weight: 500; transition: color 0.2s; }
+    .back-btn:hover { color: #ffffff; }
+  </style>
+</head>
+<body>
 
+<div class="logo-container">
+  <div class="logo">Lenovox-ai<span class="circle"></span></div>
+  <div class="typing-text" id="typingText"></div>
+</div>
+
+<div class="buttons" id="landingButtons">
+  <a href="#" id="googleBtn" class="btn">
+    <img src="https://i.postimg.cc/NfzPJPrf/sq-google-g-logo-update-dezeen-2364-col-0.jpg" alt="Google" class="btn-icon" />
+    Continue with Google
+  </a>
+  <a href="#" id="emailBtn" class="btn">
+    <img src="https://i.postimg.cc/9QS59QBD/gmail-mail-icon-for-web-design-free-png.png" alt="Email" class="btn-icon" />
+    Sign up with email
+  </a>
+  <a href="#" class="btn login-btn">Log in</a>
+</div>
+
+<div class="email-form-container" id="emailFormContainer">
+  <button class="back-btn" id="backBtn">&#8592; Back</button>
+  <div class="logo">Lenovox-ai<span class="circle"></span></div>
+  <h2>Create your account</h2>
+  <form id="signupForm">
+    <input type="text" placeholder="Full Name" required />
+    <input type="email" placeholder="Email Address" required />
+    <input type="password" placeholder="Password" required />
+    <input type="password" placeholder="Confirm Password" required />
+    <button type="submit" class="btn-submit">Sign Up</button>
+  </form>
+  <div class="forgot-password" id="forgotPassword">Forgotten password?</div>
+</div>
+
+<div class="safe-area-bottom">
+  <div class="indicator"></div>
+</div>
+
+<!-- ADD AUTH.JS HERE -->
+<script src="auth.js"></script>
+
+<script>
+  // TYPING EFFECT
+  const words = [
+    "Welcome to Lenovox-ai!", "Your Smart Study Buddy is Here", "Learn Faster • Play Smarter",
+    "Quizzes, Games & Rewards Await!", "Ask Anything – Get Instant Help", "Turn Studying into an Adventure",
+    "Earn Points • Unlock Fun Stuff", "Offline & Online • Always With You", "Daily Challenges • Quiz Mastery",
+    "Level Up Your Brain – Let's Go!", "Your Personal AI Tutor", "Study Smart, Not Hard",
+    "Ready to Crush Your Goals?", "Welcome, Future Legend 🌟"
+  ];
+
+  const typingEl = document.getElementById("typingText");
+  let wordIndex = 0, charIndex = 0, deleting = false;
+  function typeEffect() {
+    const currentWord = words[wordIndex];
+    if (!deleting) {
+      typingEl.textContent = currentWord.slice(0, charIndex++);
+      if (charIndex > currentWord.length) setTimeout(() => deleting = true, 1200);
+    } else {
+      typingEl.textContent = currentWord.slice(0, charIndex--);
+      if (charIndex === 0) { deleting = false; wordIndex = (wordIndex + 1) % words.length; }
+    }
+    setTimeout(typeEffect, deleting ? 45 : 75);
+  }
+  typeEffect();
+
+  // REDIRECTION LOGIC
+  const emailBtn = document.getElementById("emailBtn");
+  const landingButtons = document.getElementById("landingButtons");
+  const emailFormContainer = document.getElementById("emailFormContainer");
+  const backBtn = document.getElementById("backBtn");
+
+  emailBtn.addEventListener("click", () => {
+    landingButtons.style.display = "none";
+    emailFormContainer.style.display = "flex";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  backBtn.addEventListener("click", () => {
+    emailFormContainer.style.display = "none";
+    landingButtons.style.display = "flex";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  // FORM SUBMISSION USING AUTH.JS
+  const form = document.getElementById("signupForm");
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const fullName = form.querySelector('input[type="text"]').value;
+    const email = form.querySelector('input[type="email"]').value;
+    const password = form.querySelectorAll('input[type="password"]')[0].value;
+    const confirmPassword = form.querySelectorAll('input[type="password"]')[1].value;
+
+    if(password !== confirmPassword) {
+      alert("Passwords do not match!");
+      return;
+    }
+
+    try {
+      // Call your auth.js function directly
+      const result = await signUpUser({ fullName, email, password });
+      if(result.success) {
+        alert(`Account created successfully 🎉\nWelcome, ${fullName}`);
+      } else {
+        alert(result.error || "Something went wrong.");
+      }
+    } catch(err) {
+      alert("Error: " + err.message);
+    }
+  });
+
+  document.getElementById("forgotPassword").addEventListener("click", () => {
+    alert("Reset password flow will be implemented later.");
+  });
+</script>
+</body>
+      </html>
