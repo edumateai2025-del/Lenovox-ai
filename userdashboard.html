@@ -1,1 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduMateAI Dashboard</title>
+<style>
+  body { margin:0; padding:0; font-family:Arial,sans-serif; background:#f3f6fa; }
+  h2 { text-align:center; margin-top:20px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:20px; padding:20px; }
+  .card { background:white; border-radius:12px; padding:10px; box-shadow:0 4px 12px rgba(0,0,0,0.1); text-align:center; cursor:pointer; transition:0.3s; }
+  .card:hover { transform:scale(1.05); }
+  .card img { width:100%; border-radius:10px; height:120px; object-fit:cover; }
+  .card-title { margin-top:10px; font-size:16px; font-weight:bold; }
+  .card-desc { font-size:13px; color:#555; margin-top:5px; }
 
+  /* LOADER OVERLAY */
+  #loaderOverlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(3px); z-index:9999; justify-content:center; align-items:center; flex-direction:column; }
+  #loaderMessage { color:white; font-size:18px; margin-top:10px; font-weight:600; }
+
+  /* News Section */
+  .news-section{margin-top:40px; max-width:800px; margin-left:auto;margin-right:auto;}
+  .news-item{display:flex;align-items:center; background:white;padding:10px;margin-bottom:12px;border-radius:8px;box-shadow:0 3px 10px rgba(0,0,0,0.1);cursor:pointer;transition:0.2s;}
+  .news-item:hover{background:#eef4ff;}
+  .news-thumb{width:80px;height:60px;object-fit:cover;border-radius:6px;margin-right:15px;}
+  .title{font-size:16px;font-weight:bold;}
+</style>
+</head>
+<body>
+
+<h2>Lenovox-ai Dashboard</h2>
+
+<div class="grid">
+  <!-- Smart Tutor -->
+  <div class="card" onclick="startLoader('https://edumateai-smarttutor01.vercel.app/')">
+    <img src="https://i.postimg.cc/qq5CRVDM/file-00000000197871f494a6abf3eb579e17.png">
+    <div class="card-title">Smart Tutor</div>
+    <div class="card-desc">Interactive lessons and learning modules to boost your skills.</div>
+  </div>
+
+  <!-- Quiz Generator -->
+  <div class="card" onclick="startLoader('https://quiz-generator-pink.vercel.app/')">
+    <img src="https://i.ibb.co/1tDvHSsX/file-000000006c6871f4a2d165b66d383516.png">
+    <div class="card-title">Quiz Generator</div>
+    <div class="card-desc">Generate quizzes and test your knowledge anytime.</div>
+  </div>
+</div>
+
+<!-- News Section -->
+<div class="news-section">
+  <h2>Latest News</h2>
+  <ul id="newsList"><p>Loading news...</p></ul>
+</div>
+
+<!-- LOADER -->
+<div id="loaderOverlay">
+  <canvas id="loaderCanvas" width="250" height="200"></canvas>
+  <p id="loaderMessage">Please wait...</p>
+</div>
+
+<script>
+// Reset loader when page is shown again
+window.addEventListener("pageshow", () => {
+  const overlay = document.getElementById("loaderOverlay");
+  overlay.style.display = "none";
+  document.getElementById("loaderMessage").textContent = "Please wait...";
+});
+
+// Chemical bonding loader
+function startLoader(url){
+  const overlay=document.getElementById('loaderOverlay');
+  overlay.style.display='flex';
+
+  const canvas=document.getElementById('loaderCanvas');
+  const ctx=canvas.getContext('2d');
+  const width=canvas.width;
+  const height=canvas.height;
+
+  let red={x:90,y:height/2,vx:3.8,color:'red'};
+  let blue={x:160,y:height/2,vx:-3.8,color:'blue'};
+  const radius=15;
+
+  function drawBall(ball){
+    ctx.beginPath();
+    ctx.arc(ball.x,ball.y,radius,0,Math.PI*2);
+    ctx.shadowBlur=15;
+    ctx.shadowColor=ball.color;
+    ctx.fillStyle=ball.color;
+    ctx.fill();
+    ctx.shadowBlur=0;
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,width,height);
+    const dx=Math.abs(red.x-blue.x);
+    if(dx<radius+2){
+      ctx.beginPath();
+      ctx.arc((red.x+blue.x)/2,height/2,radius+6,0,Math.PI*2);
+      ctx.shadowColor='purple';
+      ctx.shadowBlur=25;
+      ctx.fillStyle='purple';
+      ctx.fill();
+      ctx.shadowBlur=0;
+    }else{
+      drawBall(red);
+      drawBall(blue);
+    }
+    red.x+=red.vx;
+    blue.x+=blue.vx;
+    if(red.x-radius<=0||red.x+radius>=width) red.vx*=-1;
+    if(blue.x-radius<=0||blue.x+radius>=width) blue.vx*=-1;
+    requestAnimationFrame(draw);
+  }
+  draw();
+
+  // Weak internet warning after 3s
+  const slowTimer=setTimeout(()=>{ document.getElementById("loaderMessage").textContent="⚠️ Weak internet detected..."; },3000);
+
+  // Redirect fast 1.5s
+  setTimeout(()=>{
+    clearTimeout(slowTimer);
+    window.location.href=url;
+  },1500);
+}
+
+// Load news via serverless API with thumbnails
+async function loadNews(){
+  const container=document.getElementById("newsList");
+  try{
+    const res=await fetch("/api/getnews");
+    const articles=await res.json();
+    container.innerHTML="";
+    articles.forEach(item=>{
+      const li=document.createElement("li");
+      li.className="news-item";
+      const thumbnail = item.urlToImage ? item.urlToImage : "https://via.placeholder.com/80x60.png?text=No+Image";
+      li.innerHTML=`<img class="news-thumb" src="${thumbnail}" alt="thumbnail"><div class="title">${item.title}</div>`;
+      li.onclick=()=>window.open(item.url,"_blank");
+      container.appendChild(li);
+    });
+  }catch(err){
+    container.innerHTML="<p>Failed to load news.</p>";
+  }
+}
+loadNews();
+</script>
+
+</body>
+</html>
