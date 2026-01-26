@@ -1,7 +1,18 @@
-// 🔹 FIREBASE CONFIG & INIT
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+// auth.js — PURE AUTH LOGIC ONLY
 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
+  sendPasswordResetEmail,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+
+// 🔹 Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDnANsKUAZ1giXXdo-fKkFneMuKh0l0FCg",
   authDomain: "edumateai-6544b.firebaseapp.com",
@@ -11,44 +22,40 @@ const firebaseConfig = {
   appId: "1:445949748647:web:40bee0e792098333fa4282"
 };
 
-// Initialize Firebase
+// 🔹 Init
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+export const auth = getAuth(app);
+export const googleProvider = new GoogleAuthProvider();
 
-// 🔹 EMAIL SIGNUP FORM LOGIC
-document.addEventListener("DOMContentLoaded", () => {
-  const form = document.getElementById("signupForm");
-  if (!form) return;
+// 🔹 SIGN UP
+export async function signUp(email, password) {
+  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+  return userCredential.user;
+}
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+// 🔹 LOGIN
+export async function login(email, password) {
+  const userCredential = await signInWithEmailAndPassword(auth, email, password);
+  return userCredential.user;
+}
 
-    const email = form.querySelector('input[type="email"]').value;
-    const password = form.querySelectorAll('input[type="password"]')[0].value;
-    const confirmPassword = form.querySelectorAll('input[type="password"]')[1].value;
+// 🔹 GOOGLE LOGIN
+export async function loginWithGoogle() {
+  const result = await signInWithPopup(auth, googleProvider);
+  return result.user;
+}
 
-    if (password !== confirmPassword) {
-      alert("Passwords do not match!");
-      return;
-    }
+// 🔹 RESET PASSWORD
+export async function resetPassword(email) {
+  await sendPasswordResetEmail(auth, email);
+}
 
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      alert("Account created successfully 🎉");
-      console.log("User UID:", userCredential.user.uid);
+// 🔹 AUTH STATE LISTENER
+export function onUserChange(callback) {
+  return onAuthStateChanged(auth, callback);
+}
 
-      // Optional: redirect user to dashboard
-      // window.location.href = "dashboard.html";
-    } catch (error) {
-      alert(error.message);
-    }
-  });
-
-  // 🔹 Forgot password placeholder
-  const forgotPassword = document.getElementById("forgotPassword");
-  if (forgotPassword) {
-    forgotPassword.addEventListener("click", () => {
-      alert("Password reset flow will be implemented later.");
-    });
-  }
-});
+// 🔹 LOGOUT
+export async function logout() {
+  await signOut(auth);
+}
