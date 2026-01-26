@@ -4,184 +4,172 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lenovox-ai Login</title>
+
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; font-family: Arial, sans-serif; }
+* { margin:0; padding:0; box-sizing:border-box; font-family: Arial, sans-serif; }
 
-  body {   
-    background: url("https://i.postimg.cc/Kzgn3bSk/9Um-WCbyxp-Ka-EGXjw-FG7d-Xo.jpg") no-repeat center center fixed;
-    background-size: cover;
-    height: 100vh;   
-    display: flex;   
-    justify-content: center;   
-    align-items: center;   
-    overflow: hidden;  
-    position: relative;  
-  }  
+body {
+  background: url("https://i.postimg.cc/Kzgn3bSk/9Um-WCbyxp-Ka-EGXjw-FG7d-Xo.jpg")
+              no-repeat center center fixed;
+  background-size: cover;
+  height: 100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
 
-  canvas {   
-    position: absolute;   
-    top:0; left:0;   
-    width:100%;   
-    height:100%;   
-    z-index:1;   
-  }  
+.login-container {
+  width:350px;
+  padding:40px 30px;
+  border-radius:18px;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  text-align:center;
+  color:white;
+}
 
-  .login-container {  
-    position: relative;  
-    z-index: 2;  
-    background: rgba(255,255,255,0.15);  
-    backdrop-filter: blur(12px); 
-    -webkit-backdrop-filter: blur(12px);
-    padding: 40px 30px;  
-    border-radius: 16px;  
-    box-shadow: 0 8px 24px rgba(0,0,0,0.25);  
-    width: 350px;  
-    text-align: center;  
-    color: white;
-  }  
+h2 {
+  font-size:36px;
+  margin-bottom:25px;
+  text-shadow:0 2px 8px rgba(0,0,0,0.6);
+}
 
-  h2 { font-size: 36px; margin-bottom: 25px; color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,0.6); }
+input {
+  width:100%;
+  padding:14px;
+  margin-bottom:15px;
+  border:none;
+  border-radius:12px;
+  background: rgba(255,255,255,0.25);
+  color:white;
+  font-size:16px;
+}
 
-  input { 
-    width: 100%; padding:12px 15px; margin-bottom:15px; 
-    border-radius:10px; border:none; 
-    font-size:16px; background: rgba(255,255,255,0.25); 
-    color: #fff; outline:none; 
-    transition:0.3s; 
-  }  
-  input::placeholder { color: #e0e0e0; }
-  input:focus { background: rgba(255,255,255,0.35); box-shadow:0 0 8px rgba(255,255,255,0.5); }
+input::placeholder { color:#eee; }
 
-  button.action-btn { 
-    width:100%; padding:12px; border:none; border-radius:10px; font-size:16px; 
-    cursor:pointer; margin-top:10px; display:flex; align-items:center; justify-content:center; 
-    transition:0.3s ease; gap:8px; font-weight:bold; 
-  }  
+button {
+  width:100%;
+  padding:14px;
+  margin-top:10px;
+  border:none;
+  border-radius:12px;
+  font-size:16px;
+  cursor:pointer;
+  font-weight:bold;
+}
 
-  #loginBtn { background: #1877f2; color:white; }
-  #loginBtn:hover { background: #105bb5; }
+#loginBtn {
+  background:#1877f2;
+  color:white;
+}
 
-  #googleLoginBtn {  
-    background: #fff;  
-    border: 1px solid #ccc;  
-    color: #555;  
-    display: flex;  
-    align-items: center;  
-    justify-content: center;  
-    gap: 8px;  
-    padding: 12px;  
-    border-radius: 10px;  
-    cursor: pointer;  
-    transition: 0.3s;  
-  }  
-  #googleLoginBtn:hover { background: #f5f5f5; }
+#loginBtn:hover { background:#105bb5; }
 
-  .google-icon svg { width:18px; height:18px; }
+#googleLoginBtn {
+  background:white;
+  color:#444;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+}
 
-  .forgot-password { margin-top:10px; font-size:14px; color:#fff; cursor:pointer; text-decoration: underline; }
+.forgot {
+  margin-top:12px;
+  font-size:14px;
+  text-decoration:underline;
+  cursor:pointer;
+}
 
-  p { margin-top:15px; font-size:14px; color:#fff; text-shadow: 0 1px 4px rgba(0,0,0,0.6); }  
-  p a { color:#1877f2; text-decoration:none; font-weight:bold; }
+p {
+  margin-top:16px;
+  font-size:14px;
+}
 
+p a {
+  color:#4da3ff;
+  font-weight:bold;
+  text-decoration:none;
+}
 </style>
 </head>
-<body>
 
-<canvas id="bgCanvas"></canvas>
+<body>
 
 <div class="login-container">
   <h2>Lenovox-ai</h2>
 
-  <div id="loginForm">
-    <input type="email" id="loginEmail" placeholder="Email" />
-    <input type="password" id="loginPassword" placeholder="Password" />
-    <button id="loginBtn" class="action-btn">Login</button>
+  <input id="loginEmail" type="email" placeholder="Email">
+  <input id="loginPassword" type="password" placeholder="Password">
 
-    <button id="googleLoginBtn" class="action-btn">
-      <span class="google-icon">
-        <svg viewBox="0 0 18 18">
-          <path fill="#4285F4" d="M17.64 9.2045c0-.638-.057-1.252-.164-1.845H9v3.493h4.844c-.209 1.116-.846 2.064-1.807 2.703v2.248h2.922c1.713-1.578 2.705-3.903 2.705-6.599z"/>
-          <path fill="#34A853" d="M9 18c2.43 0 4.468-.804 5.957-2.18l-2.922-2.248c-.81.544-1.845.866-3.035.866-2.337 0-4.314-1.58-5.022-3.701H.997v2.327C2.476 15.89 5.523 18 9 18z"/>
-          <path fill="#FBBC05" d="M3.935 11.743c-.18-.544-.283-1.124-.283-1.743 0-.62.104-1.2.283-1.744V5.929H.997C.363 7.073 0 8.5 0 9.999c0 1.498.363 2.925.997 4.07l2.938-2.327z"/>
-          <path fill="#EA4335" d="M9 3.375c1.322 0 2.502.454 3.432 1.34l2.572-2.572C13.462.605 11.424 0 9 0 5.523 0 2.476 2.11.997 5.929l2.938 2.327C4.686 5.055 6.663 3.375 9 3.375z"/>
-        </svg>
-      </span>
-      Continue with Google
-    </button>
+  <button id="loginBtn">Login</button>
 
-    <div class="forgot-password" id="showForgot">Forgot Password?</div>
-  </div>
+  <button id="googleLoginBtn">
+    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18">
+    Continue with Google
+  </button>
 
-  <p>Don't have an account? <a href="#" id="showSignup">Sign Up</a></p>
+  <div class="forgot" id="forgotBtn">Forgot password?</div>
+
+  <p>Don’t have an account?
+    <a href="signup.html">Sign up</a>
+  </p>
 </div>
 
-<!-- AUTH JS -->
-<script src="auth.js"></script>
+<!-- AUTH LOGIC -->
+<script type="module">
+  import {
+    loginUser,
+    googleLoginUser,
+    resetPassword
+  } from "./auth.js";
 
-<script>
-  // EMAIL/PASSWORD LOGIN
-  document.getElementById('loginBtn').addEventListener('click', async () => {
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
-    if(!email || !password) return alert("Please enter email & password");
+  const emailInput = document.getElementById("loginEmail");
+  const passwordInput = document.getElementById("loginPassword");
+
+  document.getElementById("loginBtn").addEventListener("click", async () => {
+    if (!emailInput.value || !passwordInput.value) {
+      alert("Enter email and password");
+      return;
+    }
+
     try {
-      const result = await loginUser({email, password}); // auth.js handles login
-      if(result.success){
-        window.location.href = "lenovox-app-skeleton.html"; // redirect on success
-      } else {
-        alert(result.error || "Login failed");
-      }
-    } catch(err){
+      const result = await loginUser({
+        email: emailInput.value,
+        password: passwordInput.value
+      });
+
+      console.log("Logged in UID:", result.user.uid);
+      window.location.href = "lenovox-app-skeleton.html";
+    } catch (err) {
       alert(err.message);
     }
   });
 
-  // GOOGLE LOGIN
-  document.getElementById('googleLoginBtn').addEventListener('click', async () => {
+  document.getElementById("googleLoginBtn").addEventListener("click", async () => {
     try {
-      const result = await googleLoginUser(); // auth.js handles Google login
-      if(result.success){
-        window.location.href = "lenovox-app-skeleton.html";
-      } else {
-        alert(result.error || "Google login failed");
-      }
-    } catch(err){
+      const result = await googleLoginUser();
+      console.log("Google UID:", result.user.uid);
+      window.location.href = "lenovox-app-skeleton.html";
+    } catch (err) {
       alert(err.message);
     }
   });
 
-  document.getElementById("showForgot").addEventListener("click", () => {
-    alert("Forgot password flow will be handled in auth.js");
-  });
+  document.getElementById("forgotBtn").addEventListener("click", async () => {
+    const email = prompt("Enter your email:");
+    if (!email) return;
 
-  // PARTICLES BACKGROUND
-  const canvas = document.getElementById('bgCanvas');
-  const ctx = canvas.getContext('2d');
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-  const particles=[];
-  for(let i=0;i<80;i++) particles.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*3+1,d:Math.random()*2});
-  function draw(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.fillStyle="rgba(255,255,255,0.6)";
-    ctx.beginPath();
-    particles.forEach(p=>{ctx.moveTo(p.x,p.y); ctx.arc(p.x,p.y,p.r,0,Math.PI*2,true);});
-    ctx.fill();
-    move();
-  }
-  let angle=0;
-  function move(){
-    angle+=0.01;
-    particles.forEach(p=>{
-      p.y+=Math.cos(angle+p.d)+1+p.r/2;
-      p.x+=Math.sin(angle)*2;
-      if(p.y>canvas.height){ p.y=0; p.x=Math.random()*canvas.width; }
-      if(p.x>canvas.width){ p.x=0; }
-    });
-  }
-  setInterval(draw,30);
-  window.addEventListener('resize',()=>{ canvas.width=window.innerWidth; canvas.height=window.innerHeight; });
+    try {
+      await resetPassword(email);
+      alert("Password reset email sent 📩");
+    } catch (err) {
+      alert(err.message);
+    }
+  });
 </script>
 
 </body>
-  </html>
+</html>
