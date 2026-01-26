@@ -1,6 +1,6 @@
-// auth.js — PURE AUTH LOGIC ONLY
+// auth.js — single source of truth for auth
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
   getAuth,
   createUserWithEmailAndPassword,
@@ -8,11 +8,10 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
   sendPasswordResetEmail,
-  onAuthStateChanged,
-  signOut
-} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-// 🔹 Firebase config
+// 🔐 Firebase config (kept here only)
 const firebaseConfig = {
   apiKey: "AIzaSyDnANsKUAZ1giXXdo-fKkFneMuKh0l0FCg",
   authDomain: "edumateai-6544b.firebaseapp.com",
@@ -22,40 +21,45 @@ const firebaseConfig = {
   appId: "1:445949748647:web:40bee0e792098333fa4282"
 };
 
-// 🔹 Init
 const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const googleProvider = new GoogleAuthProvider();
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 
-// 🔹 SIGN UP
-export async function signUp(email, password) {
+/* ======================
+   SIGN UP
+====================== */
+export async function signUpUser({ email, password }) {
   const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-  return userCredential.user;
+  return { success: true, user: userCredential.user };
 }
 
-// 🔹 LOGIN
-export async function login(email, password) {
+/* ======================
+   LOGIN (EMAIL)
+====================== */
+export async function loginUser({ email, password }) {
   const userCredential = await signInWithEmailAndPassword(auth, email, password);
-  return userCredential.user;
+  return { success: true, user: userCredential.user };
 }
 
-// 🔹 GOOGLE LOGIN
-export async function loginWithGoogle() {
-  const result = await signInWithPopup(auth, googleProvider);
-  return result.user;
+/* ======================
+   GOOGLE LOGIN
+====================== */
+export async function googleLoginUser() {
+  const result = await signInWithPopup(auth, provider);
+  return { success: true, user: result.user };
 }
 
-// 🔹 RESET PASSWORD
+/* ======================
+   FORGOT PASSWORD
+====================== */
 export async function resetPassword(email) {
   await sendPasswordResetEmail(auth, email);
+  return { success: true };
 }
 
-// 🔹 AUTH STATE LISTENER
-export function onUserChange(callback) {
-  return onAuthStateChanged(auth, callback);
-}
-
-// 🔹 LOGOUT
-export async function logout() {
-  await signOut(auth);
+/* ======================
+   AUTH STATE (USED LATER)
+====================== */
+export function watchAuth(callback) {
+  onAuthStateChanged(auth, callback);
 }
