@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduMateAI Skeleton App</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+  body {
+    margin: 0;
+    font-family: Inter, system-ui, sans-serif;
+    background: #f5f5f7;
+    padding-bottom: 75px;
+  }
+
+  /* SECTIONS */
+  .section {
+    display: none;
+    height: calc(100vh - 75px);
+    position: relative;
+  }
+  .section.active {
+    display: block;
+  }
+
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  /* LOADER */
+  .loader {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f5f5f7;
+    z-index: 5;
+  }
+  .loader::after {
+    content: "";
+    width: 40px;
+    height: 40px;
+    border: 5px solid #ddd;
+    border-top: 5px solid #1877f2;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* BOTTOM NAV */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 65px;
+    background: #fff;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 -2px 10px rgba(0,0,0,.12);
+    border-top-left-radius: 14px;
+    border-top-right-radius: 14px;
+    z-index: 100;
+  }
+
+  .nav-btn {
+    flex: 1;
+    text-align: center;
+    font-size: 12px;
+    color: #6b7280;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  .nav-btn i {
+    font-size: 16px;
+  }
+
+  .nav-btn.active {
+    color: #1877f2;
+  }
+
+  /* MIDDLE BUTTON */
+  .nav-btn.middle {
+    background: linear-gradient(135deg,#ff3d70,#ff9a2b);
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    margin-top: -20px;
+    color: #fff;
+    box-shadow: 0 6px 15px rgba(0,0,0,.2);
+    justify-content: center;
+  }
+
+  /* MEETUP SECTION */
+  #social {
+    background: linear-gradient(135deg,#ff9a2b,#ff3d70,#6a11cb);
+    color: #fff;
+    padding: 30px 20px;
+    overflow-y: auto;
+  }
+</style>
+</head>
+
+<body>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="section active">
+  <div class="loader"></div>
+  <iframe src="dashboard.html" onload="this.previousElementSibling.remove()"></iframe>
+</div>
+
+<!-- AI CHAT -->
+<div id="ai-chat" class="section">
+  <div class="loader"></div>
+  <iframe src="ai-chat.html" onload="this.previousElementSibling.remove()"></iframe>
+</div>
+
+<!-- GAMES -->
+<div id="games" class="section">
+  <div class="loader"></div>
+  <iframe src="games.html" onload="this.previousElementSibling.remove()"></iframe>
+</div>
+
+<!-- MEETUP (NO IFRAME) -->
+<div id="social" class="section">
+  <h2>MeetUp by Lenovox AI</h2>
+  <p>A safe collaborative learning space for students.</p>
+
+  <ul>
+    <li>Study groups</li>
+    <li>Shared notes & resources</li>
+    <li>AI-assisted discussions</li>
+    <li>Moderated & secure</li>
+  </ul>
+
+  <p><strong>Launch:</strong> December 16, 2026</p>
+</div>
+
+<!-- SETTINGS -->
+<div id="settings" class="section">
+  <div class="loader"></div>
+  <iframe src="settings.html" onload="this.previousElementSibling.remove()"></iframe>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <div class="nav-btn active" data-target="dashboard">
+    <i class="fas fa-home"></i>
+    <span>Dashboard</span>
+  </div>
+
+  <div class="nav-btn" data-target="ai-chat">
+    <i class="fas fa-robot"></i>
+    <span>AI</span>
+  </div>
+
+  <div class="nav-btn middle" data-target="games">
+    <i class="fas fa-gamepad"></i>
+  </div>
+
+  <div class="nav-btn" data-target="social">
+    <i class="fas fa-users"></i>
+    <span>MeetUp</span>
+  </div>
+
+  <div class="nav-btn" data-target="settings">
+    <i class="fas fa-cog"></i>
+    <span>Settings</span>
+  </div>
+</div>
+
+<script>
+  const buttons = document.querySelectorAll('.nav-btn');
+  const sections = document.querySelectorAll('.section');
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      sections.forEach(s => s.classList.remove('active'));
+      document.getElementById(btn.dataset.target).classList.add('active');
+    });
+  });
+</script>
+
+</body>
+    </html>
