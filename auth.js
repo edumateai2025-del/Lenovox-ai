@@ -1,4 +1,4 @@
-// auth.js — single source of truth for auth
+// auth.js — single source of truth for authentication
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
@@ -8,11 +8,14 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
   sendPasswordResetEmail,
-  onAuthStateChanged,
-  signOut
+  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-// 🔐 Firebase config (kept here only)
+import { saveSession, clearSession } from "./session.js";
+
+/* ======================
+   FIREBASE CONFIG
+====================== */
 const firebaseConfig = {
   apiKey: "AIzaSyDnANsKUAZ1giXXdo-fKkFneMuKh0l0FCg",
   authDomain: "edumateai-6544b.firebaseapp.com",
@@ -27,34 +30,58 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
 /* ======================
-   SIGN UP
+   SIGN UP (EMAIL)
 ====================== */
 export async function signUpUser({ email, password }) {
-  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-  setLastLogin(); // Save timestamp
-  return { success: true, user: userCredential.user };
+  const res = await createUserWithEmailAndPassword(auth, email, password);
+
+  await saveSession({
+    uid: res.user.uid,
+    email: res.user.email,
+    name: res.user.displayName || "",
+    photoURL: res.user.photoURL || "",
+    provider: "password"
+  });
+
+  return { success: true, user: res.user };
 }
 
 /* ======================
    LOGIN (EMAIL)
 ====================== */
 export async function loginUser({ email, password }) {
-  const userCredential = await signInWithEmailAndPassword(auth, email, password);
-  setLastLogin(); // Save timestamp
-  return { success: true, user: userCredential.user };
+  const res = await signInWithEmailAndPassword(auth, email, password);
+
+  await saveSession({
+    uid: res.user.uid,
+    email: res.user.email,
+    name: res.user.displayName || "",
+    photoURL: res.user.photoURL || "",
+    provider: "password"
+  });
+
+  return { success: true, user: res.user };
 }
 
 /* ======================
-   GOOGLE LOGIN
+   GOOGLE LOGIN / SIGNUP
 ====================== */
 export async function googleLoginUser() {
-  const result = await signInWithPopup(auth, provider);
-  setLastLogin(); // Save timestamp
-  return { success: true, user: result.user };
+  const res = await signInWithPopup(auth, provider);
+
+  await saveSession({
+    uid: res.user.uid,
+    email: res.user.email,
+    name: res.user.displayName || "",
+    photoURL: res.user.photoURL || "",
+    provider: "google"
+  });
+
+  return { success: true, user: res.user };
 }
 
 /* ======================
-   FORGOT PASSWORD
+   RESET PASSWORD
 ====================== */
 export async function resetPassword(email) {
   await sendPasswordResetEmail(auth, email);
@@ -62,39 +89,17 @@ export async function resetPassword(email) {
 }
 
 /* ======================
-   AUTH STATE
+   LOGOUT (FULL CLEAN)
+====================== */
+export async function logoutUser() {
+  await auth.signOut();
+  await clearSession();
+}
+
+/* ======================
+   AUTH STATE LISTENER
+   (optional – for settings)
 ====================== */
 export function watchAuth(callback) {
-  onAuthStateChanged(auth, callback);
-}
-
-/* ======================
-   AUTO-LOGIN RULE (7 DAYS)
-====================== */
-const LOGIN_VALIDITY_DAYS = 7;
-
-function setLastLogin() {
-  localStorage.setItem('lastLogin', Date.now());
-}
-
-export function checkAutoLogin() {
-  const lastLogin = localStorage.getItem('lastLogin');
-  if(!lastLogin) return false;
-
-  const now = Date.now();
-  const diffDays = (now - parseInt(lastLogin)) / (1000 * 60 * 60 * 24);
-
-  if(diffDays > LOGIN_VALIDITY_DAYS) {
-    signOut(auth);
-    localStorage.removeItem('lastLogin');
-    return false; // Must log in again
-  }
-  return true; // Still valid
-}
-
-/* ======================
-   GET USER INFO
-====================== */
-export function getCurrentUser() {
-  return auth.currentUser;
+  return onAuthStateChanged(auth, callback);
 }
