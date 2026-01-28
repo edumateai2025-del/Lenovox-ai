@@ -6,96 +6,21 @@
 <title>Lenovox-ai Login</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; font-family: Arial, sans-serif; }
-
-body {
-  background: url("https://i.postimg.cc/Kzgn3bSk/9Um-WCbyxp-Ka-EGXjw-FG7d-Xo.jpg")
-              no-repeat center center fixed;
-  background-size: cover;
-  height: 100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-.login-container {
-  width:360px;
-  padding:40px 30px;
-  border-radius:18px;
-  background: rgba(255,255,255,0.15);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-  text-align:center;
-  color:white;
-}
-
-h2 {
-  font-size:36px;
-  margin-bottom:25px;
-  text-shadow:0 2px 8px rgba(0,0,0,0.6);
-}
-
-input {
-  width:100%;
-  padding:14px;
-  margin-bottom:15px;
-  border:none;
-  border-radius:12px;
-  background: rgba(255,255,255,0.25);
-  color:white;
-  font-size:16px;
-}
-
+body { background: url("https://i.postimg.cc/Kzgn3bSk/9Um-WCbyxp-Ka-EGXjw-FG7d-Xo.jpg") no-repeat center center fixed; background-size: cover; height: 100vh; display:flex; align-items:center; justify-content:center; }
+.login-container { width:360px; padding:40px 30px; border-radius:18px; background: rgba(255,255,255,0.15); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align:center; color:white; }
+h2 { font-size:36px; margin-bottom:25px; text-shadow:0 2px 8px rgba(0,0,0,0.6); }
+input { width:100%; padding:14px; margin-bottom:15px; border:none; border-radius:12px; background: rgba(255,255,255,0.25); color:white; font-size:16px; }
 input::placeholder { color:#eee; }
-
-button {
-  width:100%;
-  padding:14px;
-  margin-top:10px;
-  border:none;
-  border-radius:12px;
-  font-size:16px;
-  cursor:pointer;
-  font-weight:bold;
-}
-
-#loginBtn {
-  background:#1877f2;
-  color:white;
-}
-#loginBtn:hover { background:#105bb5; }
-
-#googleLoginBtn {
-  background:white;
-  color:#444;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:10px;
-}
-
-#googleLoginBtn:hover { background:#f5f5f5; }
-
-.forgot {
-  margin-top:12px;
-  font-size:14px;
-  text-decoration:underline;
-  cursor:pointer;
-}
-
-p {
-  margin-top:16px;
-  font-size:14px;
-}
-
-p a {
-  color:#4da3ff;
-  font-weight:bold;
-  text-decoration:none;
-}
+button { width:100%; padding:14px; margin-top:10px; border:none; border-radius:12px; font-size:16px; cursor:pointer; font-weight:bold; }
+#loginBtn { background:#1877f2; color:white; }    
+#loginBtn:hover { background:#105bb5; }    
+#googleLoginBtn { background:white; color:#444; display:flex; align-items:center; justify-content:center; gap:10px; }    
+#googleLoginBtn:hover { background:#f5f5f5; }    
+.forgot { margin-top:12px; font-size:14px; text-decoration:underline; cursor:pointer; }    
+p { margin-top:16px; font-size:14px; }    
+p a { color:#4da3ff; font-weight:bold; text-decoration:none; }
 </style>
 </head>
-
 <body>
 
 <div class="login-container">
@@ -113,71 +38,83 @@ p a {
 
   <div class="forgot" id="forgotBtn">Forgot password?</div>
 
-  <p>Don’t have an account?
-    <a href="signup.html">Sign up</a>
-  </p>
+  <p>Don’t have an account? <a href="signup.html">Sign up</a></p>
 </div>
 
-<!-- AUTH LOGIC -->
 <script type="module">
-  import {
-    loginUser,
-    googleLoginUser,
-    resetPassword,
-    signUpUser
-  } from "./auth.js";
+import { loginUser, googleLoginUser, resetPassword } from "./auth.js";
 
-  const emailInput = document.getElementById("loginEmail");
-  const passwordInput = document.getElementById("loginPassword");
+// Constants
+const LOGIN_EXPIRY_DAYS = 7;
 
-  // LOGIN EMAIL/PASSWORD
-  document.getElementById("loginBtn").addEventListener("click", async () => {
-    if (!emailInput.value || !passwordInput.value) {
-      alert("Enter email and password");
-      return;
-    }
-    try {
-      const result = await loginUser({
-        email: emailInput.value,
-        password: passwordInput.value
-      });
-      console.log("Logged in UID:", result.user.uid);
-      // Save to localStorage/session for app-wide access
-      localStorage.setItem("uid", result.user.uid);
-      localStorage.setItem("email", result.user.email);
+// Check if already logged in
+function checkLogin() {
+  const loginData = JSON.parse(localStorage.getItem("loginData") || "{}");
+  if (loginData.uid && loginData.timestamp) {
+    const now = Date.now();
+    const diffDays = (now - loginData.timestamp) / (1000*60*60*24);
+    if (diffDays <= LOGIN_EXPIRY_DAYS) {
+      // Still valid session
       window.location.href = "appskeleton.html";
-    } catch (err) {
-      alert(err.message);
+    } else {
+      // Expired
+      localStorage.removeItem("loginData");
     }
-  });
+  }
+}
+checkLogin();
 
-  // GOOGLE LOGIN (registers automatically)
-  document.getElementById("googleLoginBtn").addEventListener("click", async () => {
-    try {
-      const result = await googleLoginUser();
-      console.log("Google UID:", result.user.uid);
-      // Optional: create account in your DB if first time
-      // e.g., await createUserInDB(result.user.uid, result.user.displayName, result.user.email);
-      localStorage.setItem("uid", result.user.uid);
-      localStorage.setItem("email", result.user.email);
-      localStorage.setItem("name", result.user.displayName || ""); 
-      window.location.href = "appskeleton.html";
-    } catch (err) {
-      alert(err.message);
-    }
-  });
+// Helpers
+function saveLogin(user) {
+  localStorage.setItem("loginData", JSON.stringify({
+    uid: user.uid,
+    email: user.email,
+    name: user.displayName || "",
+    timestamp: Date.now()
+  }));
+}
 
-  // FORGOT PASSWORD
-  document.getElementById("forgotBtn").addEventListener("click", async () => {
-    const email = prompt("Enter your email for password reset:");
-    if (!email) return;
-    try {
-      await resetPassword(email);
-      alert("Password reset email sent 📩");
-    } catch (err) {
-      alert(err.message);
-    }
-  });
+// Elements
+const emailInput = document.getElementById("loginEmail");
+const passwordInput = document.getElementById("loginPassword");
+
+// Login with Email
+document.getElementById("loginBtn").addEventListener("click", async () => {
+  if (!emailInput.value || !passwordInput.value) {
+    alert("Enter email and password");
+    return;
+  }
+  try {
+    const result = await loginUser({ email: emailInput.value, password: passwordInput.value });
+    saveLogin(result.user);
+    window.location.href = "appskeleton.html";
+  } catch (err) {
+    alert(err.message);
+  }
+});
+
+// Login with Google
+document.getElementById("googleLoginBtn").addEventListener("click", async () => {
+  try {
+    const result = await googleLoginUser();
+    saveLogin(result.user);
+    window.location.href = "appskeleton.html";
+  } catch (err) {
+    alert(err.message);
+  }
+});
+
+// Forgot password
+document.getElementById("forgotBtn").addEventListener("click", async () => {
+  const email = prompt("Enter your email for password reset:");
+  if (!email) return;
+  try {
+    await resetPassword(email);
+    alert("Password reset email sent 📩");
+  } catch (err) {
+    alert(err.message);
+  }
+});
 </script>
 
 </body>
