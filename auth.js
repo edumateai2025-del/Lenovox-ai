@@ -8,10 +8,13 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
   sendPasswordResetEmail,
+  updateProfile,
+  signOut,
+  deleteUser,
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-import { saveSession, clearSession } from "./session.js";
+import { saveSession, clearSession, getSession } from "./session.js";
 
 /* ======================
    FIREBASE CONFIG
@@ -32,8 +35,12 @@ const provider = new GoogleAuthProvider();
 /* ======================
    SIGN UP (EMAIL)
 ====================== */
-export async function signUpUser({ email, password }) {
+export async function signUpUser({ email, password, displayName }) {
   const res = await createUserWithEmailAndPassword(auth, email, password);
+
+  if (displayName) {
+    await updateProfile(res.user, { displayName });
+  }
 
   await saveSession({
     uid: res.user.uid,
@@ -89,17 +96,53 @@ export async function resetPassword(email) {
 }
 
 /* ======================
-   LOGOUT (FULL CLEAN)
+   UPDATE DISPLAY NAME (Settings)
 ====================== */
-export async function logoutUser() {
-  await auth.signOut();
-  await clearSession();
+export async function updateDisplayName(name) {
+  if (!auth.currentUser) throw new Error("No user logged in");
+  await updateProfile(auth.currentUser, { displayName: name });
+
+  // Refresh session after update
+  await saveSession({
+    uid: auth.currentUser.uid,
+    email: auth.currentUser.email,
+    name: auth.currentUser.displayName || "",
+    photoURL: auth.currentUser.photoURL || "",
+    provider: auth.currentUser.providerData[0].providerId || "password"
+  });
+
+  return { success: true };
 }
 
 /* ======================
-   AUTH STATE LISTENER
-   (optional – for settings)
+   LOGOUT
+====================== */
+export async function logoutUser() {
+  await signOut(auth);
+  await clearSession();
+  return { success: true };
+}
+
+/* ======================
+   DELETE ACCOUNT (optional)
+====================== */
+export async function deleteUserAccount() {
+  if (!auth.currentUser) throw new Error("No user logged in");
+  await deleteUser(auth.currentUser);
+  await clearSession();
+  return { success: true };
+}
+
+/* ======================
+   WATCH AUTH STATE
 ====================== */
 export function watchAuth(callback) {
   return onAuthStateChanged(auth, callback);
+}
+
+/* ======================
+   GET CURRENT USER SESSION
+====================== */
+export function getCurrentUser() {
+  return getSession(); // from session.js, includes 7-day check
 }
