@@ -10,185 +10,264 @@ body {
   font-family: Arial, sans-serif;
   background: #f4f6f8;
   margin: 0;
-  padding: 20px;
+  transition: background 0.3s, color 0.3s;
 }
+body.dark { background: #1a1a1a; color: #eee; }
+body.dark .container { background: #2d2d2d; color: #eee; border: 1px solid #444; }
+body.dark input, body.dark select, body.dark textarea { background: #3d3d3d; color: #fff; border-color: #555; }
+body.dark .tab { background: #444; color: #ccc; }
+body.dark h2 { color: #fff; }
+body.dark label { color: #bbb; }
+body.dark #supportList { background: #333; border-color: #555; }
+
 .container {
-  max-width: 420px;
-  margin: auto;
+  max-width: 520px;
+  margin: 30px auto;
   background: white;
   padding: 25px;
   border-radius: 14px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
-h2 {
-  text-align: center;
+h2 { text-align: center; }
+
+.tabs {
+  display: flex;
+  gap: 5px;
   margin-bottom: 20px;
 }
+.tab {
+  flex: 1;
+  padding: 10px;
+  cursor: pointer;
+  border: none;
+  background: #eee;
+  border-radius: 8px;
+}
+.tab.active {
+  background: #32a852;
+  color: white;
+}
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
 .profile {
   text-align: center;
+  margin-bottom: 15px;
 }
 .profile img {
-  width: 110px;
-  height: 110px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
-  object-fit: cover;
-  cursor: pointer;
   border: 3px solid #32a852;
-  transition: 0.3s;
+  cursor: pointer;
+  object-fit: cover;
 }
-.profile img:hover {
-  transform: scale(1.05);
-}
-input, select, button {
+
+input, select, textarea, button {
   width: 100%;
-  margin-top: 12px;
   padding: 12px;
+  margin-top: 10px;
   border-radius: 8px;
   border: 1px solid #ccc;
-  font-size: 15px;
 }
+
 button {
   background: #32a852;
   color: white;
-  border: none;
   font-weight: bold;
   cursor: pointer;
 }
-button:hover {
-  opacity: 0.9;
-}
+button:disabled { background: #ccc; }
+
 .logout {
-  background: #000;
-  margin-top: 20px;
+  background: #d32f2f;
+  margin-top: 25px;
 }
-small {
-  display: block;
-  text-align: center;
-  color: #666;
-  margin-top: 10px;
+
+#supportList {
+  margin-top: 15px;
+  max-height: 250px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 10px;
 }
-.dark {
-  background: #111;
-  color: white;
-}
-.dark .container {
-  background: #1c1c1c;
+
+.lock-hint {
+  font-size: 0.75rem;
+  color: #d32f2f;
+  display: none;
 }
 </style>
 </head>
+
 <body>
 
 <div class="container">
-  <h2>Settings</h2>
+<h2>Settings</h2>
 
+<div class="tabs">
+  <button class="tab" id="tab-personal">Personal</button>
+  <button class="tab" id="tab-app">App</button>
+  <button class="tab" id="tab-support">Support</button>
+</div>
+
+<div id="content-personal" class="tab-content">
   <div class="profile">
-    <img id="avatar" src="https://i.postimg.cc/MTd0xxGM/grok-1767825639177-1.jpg">
+    <img id="avatar" src="https://via.placeholder.com/120">
     <input type="file" id="photo" accept="image/*" hidden>
     <small>Tap image to change</small>
   </div>
 
-  <input type="text" id="username" placeholder="Username" disabled>
-  <input type="text" id="name" placeholder="Full Name">
-  <input type="number" id="age" placeholder="Age">
-  
+  <label>UID</label>
+  <input id="uid" readonly>
+
+  <label>Username</label>
+  <input id="username" readonly>
+
+  <label>Full Name</label>
+  <input id="name">
+  <div id="name-lock-hint" class="lock-hint">Name can only be changed once</div>
+
+  <label>Age</label>
+  <input id="age" readonly>
+
+  <button id="savePersonal">Save Personal Info</button>
+</div>
+
+<div id="content-app" class="tab-content">
+  <label>Theme</label>
   <select id="theme">
-    <option value="">Select Theme</option>
     <option value="light">Light</option>
     <option value="dark">Dark</option>
   </select>
+  <button id="saveApp">Save App Settings</button>
+</div>
 
-  <button id="saveBtn">Save Settings</button>
-  <button id="changePasswordBtn">Change Password</button>
-  <button class="logout" id="logoutBtn">Log Out</button>
+<div id="content-support" class="tab-content">
+  <textarea id="supportMessage" placeholder="Your message"></textarea>
+  <button id="sendSupport">Send</button>
+  <div id="supportList"></div>
+</div>
+
+<button class="logout" id="logoutBtn">Log Out</button>
 </div>
 
 <script type="module">
-  import { watchAuth, logoutUser, resetPassword, updateDisplayName, getCurrentUser } from './auth.js';
-  
-  const avatar = document.getElementById("avatar");
-  const photoInput = document.getElementById("photo");
-  const nameInput = document.getElementById("name");
-  const ageInput = document.getElementById("age");
-  const themeSelect = document.getElementById("theme");
-  const usernameInput = document.getElementById("username");
-  const saveBtn = document.getElementById("saveBtn");
-  const logoutBtn = document.getElementById("logoutBtn");
-  const changePasswordBtn = document.getElementById("changePasswordBtn");
+import { auth, db, storage, logoutUser } from './auth.js';
+import { getSession, saveSession } from './session.js';
 
-  avatar.onclick = () => photoInput.click();
+import {
+  doc, getDoc, setDoc, addDoc, collection, query, where, orderBy, onSnapshot, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  // Apply theme helper
-  function applyTheme(theme) {
-    if (theme === "dark") {
-      document.body.classList.add("dark");
-    } else {
-      document.body.classList.remove("dark");
+import {
+  ref, uploadBytes, getDownloadURL
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+/* ---------------- STATE ---------------- */
+let currentUser = null;
+let unsubscribeSupport = null;
+let userData = null;
+
+/* ---------------- TAB SWITCH (FIXED) ---------------- */
+const tabs = {
+  "tab-personal": "content-personal",
+  "tab-app": "content-app",
+  "tab-support": "content-support"
+};
+
+Object.keys(tabs).forEach(tabId => {
+  document.getElementById(tabId).onclick = () => {
+    Object.keys(tabs).forEach(t => {
+      document.getElementById(t).classList.remove("active");
+      document.getElementById(tabs[t]).classList.remove("active");
+    });
+
+    document.getElementById(tabId).classList.add("active");
+    document.getElementById(tabs[tabId]).classList.add("active");
+
+    if (tabId === "tab-support") initSupport();
+    else if (unsubscribeSupport) unsubscribeSupport();
+  };
+});
+
+(document.getElementById(sessionStorage.getItem("lastTab") || "tab-personal")).click();
+
+/* ---------------- ELEMENTS ---------------- */
+const avatar = document.getElementById("avatar");
+const photo = document.getElementById("photo");
+
+/* ---------------- IMAGE PICK ---------------- */
+avatar.onclick = () => photo.click();
+photo.onchange = () => {
+  if (photo.files[0]) {
+    const r = new FileReader();
+    r.onload = e => avatar.src = e.target.result;
+    r.readAsDataURL(photo.files[0]);
+  }
+};
+
+/* ---------------- AUTH ---------------- */
+auth.onAuthStateChanged(async user => {
+  if (!user) return location.href = "Login.html";
+  currentUser = user;
+
+  uid.value = user.uid;
+  username.value = user.displayName || "user_" + user.uid.slice(0,6);
+
+  const snap = await getDoc(doc(db, "users", user.uid));
+  if (snap.exists()) {
+    userData = snap.data();
+    name.value = userData.name || "";
+    age.value = userData.age || "";
+    theme.value = userData.theme || "light";
+    if (userData.photo) avatar.src = userData.photo;
+
+    if (userData.nameChangedCount >= 1) {
+      name.readOnly = true;
+      document.getElementById("name-lock-hint").style.display = "block";
     }
   }
+});
 
-  // Load user info from session/localStorage
-  const session = getCurrentUser();
-  if (session) {
-    usernameInput.value = "user_" + session.uid.slice(0,6);
-    nameInput.value = session.name || "";
-    ageInput.value = session.age || "";
-    themeSelect.value = session.theme || "";
-    applyTheme(session.theme);
-    if (session.photoURL) avatar.src = session.photoURL;
+/* ---------------- SAVE PERSONAL ---------------- */
+savePersonal.onclick = async () => {
+  const update = {};
+  if (name.value !== userData?.name) {
+    if (userData?.nameChangedCount >= 1) return alert("Name locked");
+    update.name = name.value;
+    update.nameChangedCount = 1;
   }
 
-  // Preview selected photo
-  photoInput.addEventListener("change", e => {
-    const file = e.target.files[0];
-    if (file) avatar.src = URL.createObjectURL(file);
+  if (photo.files[0]) {
+    const r = ref(storage, `profiles/${currentUser.uid}.jpg`);
+    await uploadBytes(r, photo.files[0]);
+    update.photo = await getDownloadURL(r);
+  }
+
+  if (Object.keys(update).length)
+    await setDoc(doc(db,"users",currentUser.uid), update, {merge:true});
+
+  alert("Saved");
+};
+
+/* ---------------- SUPPORT ---------------- */
+function initSupport() {
+  if (unsubscribeSupport) return;
+  const q = query(collection(db,"support"), where("uid","==",currentUser.uid), orderBy("time","desc"));
+  unsubscribeSupport = onSnapshot(q, s => {
+    supportList.innerHTML = "";
+    s.forEach(d => supportList.innerHTML += `<div>${d.data().message}</div>`);
   });
+}
 
-  // Save settings
-  saveBtn.addEventListener("click", async () => {
-    const user = getCurrentUser();
-    if (!user) {
-      alert("You must be logged in to save settings!");
-      return;
-    }
-
-    // Update display name
-    if (nameInput.value) {
-      await updateDisplayName(nameInput.value);
-    }
-
-    // Save theme/age to session/localStorage
-    const newSession = { ...user, age: ageInput.value, theme: themeSelect.value };
-    localStorage.setItem("userSession", JSON.stringify(newSession));
-
-    applyTheme(themeSelect.value);
-    alert("Settings saved ✅");
-  });
-
-  // Change password
-  changePasswordBtn.addEventListener("click", async () => {
-    const email = session?.email;
-    if (!email) {
-      alert("No logged-in user!");
-      return;
-    }
-    const confirmReset = confirm("Do you want to send a password reset email?");
-    if (confirmReset) {
-      try {
-        await resetPassword(email);
-        alert("Password reset email sent ✅");
-      } catch (err) {
-        alert(err.message);
-      }
-    }
-  });
-
-  // Logout
-  logoutBtn.addEventListener("click", async () => {
-    await logoutUser();
-    alert("Logged out successfully!");
-    window.location.href = "login.html";
-  });
+/* ---------------- LOGOUT ---------------- */
+logoutBtn.onclick = async () => {
+  await logoutUser();
+  location.href = "Login.html";
+};
 </script>
-
 </body>
 </html>
