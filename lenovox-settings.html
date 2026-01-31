@@ -186,22 +186,32 @@ label {
 </div>
 
 <script type="module">
-/**
- * 1. Firebase duplication: NO Firebase initialization here.
- * 2. Auth state source: Rely on centralized auth from auth.js.
- * 15. Security exposure: Configs are hidden and centralized in auth.js.
- */
-import { auth, db, storage, logoutUser } from './auth.js';
+/* 1. Imports aligned with your auth.js and session.js */
+import { watchAuth, logoutUser, updateDisplayName } from './auth.js';
 import { getSession, saveSession } from './session.js';
 
-// Specific Firebase SDK imports for functional use
+// We still need Firestore/Storage for direct data access in Settings
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { 
-  doc, getDoc, setDoc, addDoc, collection, query, where, orderBy, onSnapshot, serverTimestamp 
+  getFirestore, doc, getDoc, setDoc, addDoc, collection, query, where, orderBy, onSnapshot, serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
 import { 
-  ref, uploadBytes, getDownloadURL 
+  getStorage, ref, uploadBytes, getDownloadURL 
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+/* ================= FIREBASE INIT (Internal for direct DB access) ================= */
+// Note: We use the same config as your auth.js to ensure consistency
+const firebaseConfig = {
+  apiKey: "AIzaSyDnANsKUAZ1giXXdo-fKkFneMuKh0l0FCg",
+  authDomain: "edumateai-6544b.firebaseapp.com",
+  projectId: "edumateai-6544b",
+  storageBucket: "edumateai-6544b.appspot.com",
+  messagingSenderId: "445949748647",
+  appId: "1:445949748647:web:40bee0e792098333fa4282"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const storage = getStorage(app);
 
 /* ================= STATE MANAGEMENT ================= */
 let currentUser = null;
@@ -225,42 +235,16 @@ Object.keys(tabs).forEach(tabId => {
     btn.classList.add("active");
     document.getElementById(tabs[tabId]).classList.add("active");
     sessionStorage.setItem("lastTab", tabId);
-    /* ================= TAB SWITCH ================= */
-const tabs = {
-  "tab-personal": "content-personal",
-  "tab-app": "content-app",
-  "tab-support": "content-support"
-};
-
-Object.keys(tabs).forEach(tabId => {
-  const btn = document.getElementById(tabId);
-  btn.onclick = () => {
-    // Remove active class from all tabs & contents
-    Object.keys(tabs).forEach(t => {
-      document.getElementById(t).classList.remove("active");
-      document.getElementById(tabs[t]).classList.remove("active");
-    });
-
-    // Set active tab
-    btn.classList.add("active");
-    document.getElementById(tabs[tabId]).classList.add("active");
-    sessionStorage.setItem("lastTab", tabId);
-
-    // Support tab listener logic
+    
     if (tabId === 'tab-support') {
-      if (!unsubscribeSupport) {
         initSupportListener();
-      }
-    } else {
-      if (unsubscribeSupport) {
+    } else if (unsubscribeSupport) {
         unsubscribeSupport();
         unsubscribeSupport = null;
-      }
     }
   };
 });
 
-// Open last active tab
 const lastTab = sessionStorage.getItem("lastTab") || "tab-personal";
 if (document.getElementById(lastTab)) document.getElementById(lastTab).click();
 
@@ -276,7 +260,6 @@ const supportMessage = document.getElementById("supportMessage");
 const supportList = document.getElementById("supportList");
 
 /* ================= THEME APPLICATION ================= */
-// 10. Theme application: Apply theme to body
 function applyTheme(theme) {
     if (theme === 'dark') {
         document.body.classList.add('dark');
@@ -286,22 +269,23 @@ function applyTheme(theme) {
 }
 
 /* ================= SESSION PERSISTENCE ================= */
-// 3. Session persistence: Read from session first for instant UI
 async function initFromSession() {
-    const sessionData = await getSession();
-    if (sessionData) {
-        nameInput.value = sessionData.name || "";
-        themeSelect.value = sessionData.theme || "light";
-        if (sessionData.avatar) avatar.src = sessionData.avatar;
-        applyTheme(sessionData.theme);
-    }
+    try {
+        const sessionData = await getSession();
+        if (sessionData) {
+            nameInput.value = sessionData.name || "";
+            themeSelect.value = sessionData.theme || "light";
+            if (sessionData.photoURL) avatar.src = sessionData.photoURL;
+            applyTheme(sessionData.theme);
+        }
+    } catch (e) { console.error("Session Init Error:", e); }
 }
 initFromSession();
 
 /* ================= AUTH & DATA SYNC ================= */
-auth.onAuthStateChanged(async (user) => {
+// Using watchAuth from your auth.js
+watchAuth(async (user) => {
   if (!user) {
-    // 5. Logout flow: Consistent redirect to Login.html
     window.location.href = "Login.html";
     return;
   }
@@ -315,16 +299,11 @@ auth.onAuthStateChanged(async (user) => {
     if (snap.exists()) {
       userDataFromDB = snap.data();
       
-      // Sync UI with DB
-      nameInput.value = userDataFromDB.name || "";
+      nameInput.value = userDataFromDB.name || user.displayName || "";
       ageInput.value = userDataFromDB.age || "";
       themeSelect.value = userDataFromDB.theme || "light";
       if (userDataFromDB.photo) avatar.src = userDataFromDB.photo;
       
-      // 6. Age field rule: Age must be non-editable
-      // 8. UID immutability: Handled by 'readonly' attribute in HTML
-      
-      // 7. Name change rule: Check if name was already changed
       if (userDataFromDB.nameChangedCount >= 1) {
           nameInput.readOnly = true;
           document.getElementById('name-lock-hint').style.display = 'block';
@@ -332,11 +311,13 @@ auth.onAuthStateChanged(async (user) => {
 
       applyTheme(userDataFromDB.theme);
       
-      // 4. Session updates: Sync IndexedDB
-      saveSession({
-          name: userDataFromDB.name,
-          theme: userDataFromDB.theme,
-          avatar: userDataFromDB.photo
+      // Update session.js IndexedDB
+      await saveSession({
+          uid: user.uid,
+          email: user.email,
+          name: userDataFromDB.name || user.displayName || "",
+          photoURL: userDataFromDB.photo || user.photoURL || "",
+          theme: userDataFromDB.theme
       });
     }
   } catch (err) {
@@ -364,8 +345,8 @@ document.getElementById("savePersonal").onclick = async () => {
 
   const updateData = {};
   
-  // 7. Name change logic
-  if (nameInput.value !== (userDataFromDB?.name || "")) {
+  // Name change logic
+  if (nameInput.value !== (userDataFromDB?.name || currentUser.displayName || "")) {
       if ((userDataFromDB?.nameChangedCount || 0) >= 1) {
           alert("Name can only be changed once.");
           btn.disabled = false;
@@ -374,10 +355,14 @@ document.getElementById("savePersonal").onclick = async () => {
       }
       updateData.name = nameInput.value;
       updateData.nameChangedCount = (userDataFromDB?.nameChangedCount || 0) + 1;
+      
+      // Update Firebase Auth profile via your auth.js function
+      try {
+          await updateDisplayName(nameInput.value);
+      } catch (e) { console.error("Auth Profile Update Error:", e); }
   }
 
   try {
-    // 9. Profile photo sync: Upload and update session
     if (photoInput.files[0]) {
       const imgRef = ref(storage, `profiles/${currentUser.uid}.jpg`);
       await uploadBytes(imgRef, photoInput.files[0]);
@@ -389,11 +374,15 @@ document.getElementById("savePersonal").onclick = async () => {
     if (Object.keys(updateData).length > 0) {
         await setDoc(doc(db, "users", currentUser.uid), updateData, { merge: true });
         
-        // Update local state and session
         userDataFromDB = { ...userDataFromDB, ...updateData };
-        saveSession({ 
-            name: userDataFromDB.name, 
-            avatar: userDataFromDB.photo || avatar.src 
+        
+        // Sync session.js
+        await saveSession({
+            uid: currentUser.uid,
+            email: currentUser.email,
+            name: userDataFromDB.name || currentUser.displayName || "",
+            photoURL: userDataFromDB.photo || currentUser.photoURL || "",
+            theme: userDataFromDB.theme || themeSelect.value
         });
         
         if (userDataFromDB.nameChangedCount >= 1) {
@@ -416,7 +405,16 @@ document.getElementById("saveApp").onclick = async () => {
   const newTheme = themeSelect.value;
   try {
     await setDoc(doc(db, "users", currentUser.uid), { theme: newTheme }, { merge: true });
-    saveSession({ theme: newTheme });
+    
+    // Update session
+    await saveSession({
+        uid: currentUser.uid,
+        email: currentUser.email,
+        name: nameInput.value,
+        photoURL: avatar.src,
+        theme: newTheme
+    });
+    
     applyTheme(newTheme);
     alert("Theme saved ✅");
   } catch(err) {
@@ -428,7 +426,6 @@ document.getElementById("saveApp").onclick = async () => {
 function initSupportListener() {
     if (!currentUser) return;
     
-    // 11. Support message scope: Scoped to current user for security/efficiency
     const q = query(
         collection(db, "support"), 
         where("uid", "==", currentUser.uid),
@@ -470,9 +467,8 @@ document.getElementById("sendSupport").onclick = async () => {
 /* ================= LOGOUT ================= */
 document.getElementById("logoutBtn").onclick = async () => {
   try {
-    // 5. Logout flow: Centralized logic via auth.js
     await logoutUser();
-    // Redirect is handled by onAuthStateChanged, but explicit redirect here for safety
+    // Redirect is handled by watchAuth, but explicit for safety
     window.location.href = "Login.html";
   } catch(err) {
     console.error("Logout error:", err);
