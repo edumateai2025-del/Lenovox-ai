@@ -12,6 +12,7 @@ body {
   margin: 0;
   transition: background 0.3s, color 0.3s;
 }
+/* Dark Mode Support */
 body.dark { background: #1a1a1a; color: #eee; }
 body.dark .container { background: #2d2d2d; color: #eee; border: 1px solid #444; }
 body.dark input, body.dark select, body.dark textarea { background: #3d3d3d; color: #fff; border-color: #555; }
@@ -19,6 +20,7 @@ body.dark .tab { background: #444; color: #ccc; }
 body.dark h2 { color: #fff; }
 body.dark label { color: #bbb; }
 body.dark #supportList { background: #333; border-color: #555; }
+body.dark .support-item { border-bottom-color: #444; }
 
 .container {
   max-width: 520px;
@@ -28,8 +30,9 @@ body.dark #supportList { background: #333; border-color: #555; }
   border-radius: 14px;
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
-h2 { text-align: center; }
+h2 { text-align: center; color: #333; }
 
+/* Tabs */
 .tabs {
   display: flex;
   gap: 5px;
@@ -42,12 +45,14 @@ h2 { text-align: center; }
   border: none;
   background: #eee;
   border-radius: 8px;
+  transition: background 0.3s;
 }
 .tab.active {
   background: #32a852;
   color: white;
 }
 
+/* Content */
 .tab-content { display: none; }
 .tab-content.active { display: block; }
 
@@ -70,15 +75,18 @@ input, select, textarea, button {
   margin-top: 10px;
   border-radius: 8px;
   border: 1px solid #ccc;
+  box-sizing: border-box;
 }
 
 button {
   background: #32a852;
   color: white;
+  border: none;
   font-weight: bold;
   cursor: pointer;
 }
-button:disabled { background: #ccc; }
+button:hover { opacity: 0.9; }
+button:disabled { background: #ccc !important; cursor: not-allowed; }
 
 .logout {
   background: #d32f2f;
@@ -92,11 +100,28 @@ button:disabled { background: #ccc; }
   border: 1px solid #ccc;
   border-radius: 8px;
   padding: 10px;
+  background: #fafafa;
 }
-
+.support-item {
+  border-bottom: 1px solid #eee;
+  padding: 10px 0;
+}
+.support-item:last-child { border-bottom: none; }
+.support-time {
+  font-size: 0.75rem;
+  color: #888;
+  display: block;
+}
+label {
+  display: block;
+  margin-top: 15px;
+  font-size: 0.9rem;
+  color: #666;
+}
 .lock-hint {
   font-size: 0.75rem;
   color: #d32f2f;
+  margin-top: 4px;
   display: none;
 }
 </style>
@@ -105,73 +130,85 @@ button:disabled { background: #ccc; }
 <body>
 
 <div class="container">
-<h2>Settings</h2>
+  <h2>Settings</h2>
 
-<div class="tabs">
-  <button class="tab" id="tab-personal">Personal</button>
-  <button class="tab" id="tab-app">App</button>
-  <button class="tab" id="tab-support">Support</button>
-</div>
-
-<div id="content-personal" class="tab-content">
-  <div class="profile">
-    <img id="avatar" src="https://via.placeholder.com/120">
-    <input type="file" id="photo" accept="image/*" hidden>
-    <small>Tap image to change</small>
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab" id="tab-personal">Personal</button>
+    <button class="tab" id="tab-app">App</button>
+    <button class="tab" id="tab-support">Support</button>
   </div>
 
-  <label>UID</label>
-  <input id="uid" readonly>
+  <!-- PERSONAL -->
+  <div id="content-personal" class="tab-content">
+    <div class="profile">
+      <img id="avatar" src="https://via.placeholder.com/120" alt="Profile Picture">
+      <input type="file" id="photo" accept="image/*" hidden>
+      <br><small>Tap image to change</small>
+    </div>
 
-  <label>Username</label>
-  <input id="username" readonly>
+    <label for="uid">UID (Read-only)</label>
+    <input id="uid" readonly placeholder="UID">
+    
+    <label for="username">Username</label>
+    <input id="username" readonly placeholder="Username">
+    
+    <label for="name">Full Name</label>
+    <input id="name" placeholder="Full Name">
+    <div id="name-lock-hint" class="lock-hint">Name can only be changed once.</div>
+    
+    <label for="age">Age (Read-only)</label>
+    <input id="age" type="number" readonly placeholder="Age">
+    <div id="age-lock-hint" class="lock-hint" style="display:block;">Age cannot be changed after registration.</div>
 
-  <label>Full Name</label>
-  <input id="name">
-  <div id="name-lock-hint" class="lock-hint">Name can only be changed once</div>
+    <button id="savePersonal">Save Personal Info</button>
+  </div>
 
-  <label>Age</label>
-  <input id="age" readonly>
+  <!-- APP -->
+  <div id="content-app" class="tab-content">
+    <label for="theme">App Theme</label>
+    <select id="theme">
+      <option value="light">Light</option>
+      <option value="dark">Dark</option>
+    </select>
+    <button id="saveApp">Save App Settings</button>
+  </div>
 
-  <button id="savePersonal">Save Personal Info</button>
-</div>
+  <!-- SUPPORT -->
+  <div id="content-support" class="tab-content">
+    <label for="supportMessage">Contact Support</label>
+    <textarea id="supportMessage" rows="4" placeholder="Your message"></textarea>
+    <button id="sendSupport">Send</button>
+    <div id="supportList"></div>
+  </div>
 
-<div id="content-app" class="tab-content">
-  <label>Theme</label>
-  <select id="theme">
-    <option value="light">Light</option>
-    <option value="dark">Dark</option>
-  </select>
-  <button id="saveApp">Save App Settings</button>
-</div>
-
-<div id="content-support" class="tab-content">
-  <textarea id="supportMessage" placeholder="Your message"></textarea>
-  <button id="sendSupport">Send</button>
-  <div id="supportList"></div>
-</div>
-
-<button class="logout" id="logoutBtn">Log Out</button>
+  <button class="logout" id="logoutBtn">Log Out</button>
 </div>
 
 <script type="module">
+/**
+ * 1. Firebase duplication: NO Firebase initialization here.
+ * 2. Auth state source: Rely on centralized auth from auth.js.
+ * 15. Security exposure: Configs are hidden and centralized in auth.js.
+ */
 import { auth, db, storage, logoutUser } from './auth.js';
 import { getSession, saveSession } from './session.js';
 
-import {
-  doc, getDoc, setDoc, addDoc, collection, query, where, orderBy, onSnapshot, serverTimestamp
+// Specific Firebase SDK imports for functional use
+import { 
+  doc, getDoc, setDoc, addDoc, collection, query, where, orderBy, onSnapshot, serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-import {
-  ref, uploadBytes, getDownloadURL
+import { 
+  ref, uploadBytes, getDownloadURL 
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-/* ---------------- STATE ---------------- */
+/* ================= STATE MANAGEMENT ================= */
 let currentUser = null;
 let unsubscribeSupport = null;
-let userData = null;
+let userDataFromDB = null;
 
-/* ---------------- TAB SWITCH (FIXED) ---------------- */
+/* ================= TAB SWITCH ================= */
 const tabs = {
   "tab-personal": "content-personal",
   "tab-app": "content-app",
@@ -179,95 +216,269 @@ const tabs = {
 };
 
 Object.keys(tabs).forEach(tabId => {
-  document.getElementById(tabId).onclick = () => {
+  const btn = document.getElementById(tabId);
+  btn.onclick = () => {
+    Object.keys(tabs).forEach(t => {
+      document.getElementById(t).classList.remove("active");
+      document.getElementById(tabs[t]).classList.remove("active");
+    });
+    btn.classList.add("active");
+    document.getElementById(tabs[tabId]).classList.add("active");
+    sessionStorage.setItem("lastTab", tabId);
+    /* ================= TAB SWITCH ================= */
+const tabs = {
+  "tab-personal": "content-personal",
+  "tab-app": "content-app",
+  "tab-support": "content-support"
+};
+
+Object.keys(tabs).forEach(tabId => {
+  const btn = document.getElementById(tabId);
+  btn.onclick = () => {
+    // Remove active class from all tabs & contents
     Object.keys(tabs).forEach(t => {
       document.getElementById(t).classList.remove("active");
       document.getElementById(tabs[t]).classList.remove("active");
     });
 
-    document.getElementById(tabId).classList.add("active");
+    // Set active tab
+    btn.classList.add("active");
     document.getElementById(tabs[tabId]).classList.add("active");
+    sessionStorage.setItem("lastTab", tabId);
 
-    if (tabId === "tab-support") initSupport();
-    else if (unsubscribeSupport) unsubscribeSupport();
+    // Support tab listener logic
+    if (tabId === 'tab-support') {
+      if (!unsubscribeSupport) {
+        initSupportListener();
+      }
+    } else {
+      if (unsubscribeSupport) {
+        unsubscribeSupport();
+        unsubscribeSupport = null;
+      }
+    }
   };
 });
 
-(document.getElementById(sessionStorage.getItem("lastTab") || "tab-personal")).click();
+// Open last active tab
+const lastTab = sessionStorage.getItem("lastTab") || "tab-personal";
+if (document.getElementById(lastTab)) document.getElementById(lastTab).click();
 
-/* ---------------- ELEMENTS ---------------- */
+/* ================= ELEMENTS ================= */
 const avatar = document.getElementById("avatar");
-const photo = document.getElementById("photo");
+const photoInput = document.getElementById("photo");
+const uidInput = document.getElementById("uid");
+const usernameInput = document.getElementById("username");
+const nameInput = document.getElementById("name");
+const ageInput = document.getElementById("age");
+const themeSelect = document.getElementById("theme");
+const supportMessage = document.getElementById("supportMessage");
+const supportList = document.getElementById("supportList");
 
-/* ---------------- IMAGE PICK ---------------- */
-avatar.onclick = () => photo.click();
-photo.onchange = () => {
-  if (photo.files[0]) {
-    const r = new FileReader();
-    r.onload = e => avatar.src = e.target.result;
-    r.readAsDataURL(photo.files[0]);
-  }
-};
-
-/* ---------------- AUTH ---------------- */
-auth.onAuthStateChanged(async user => {
-  if (!user) return location.href = "Login.html";
-  currentUser = user;
-
-  uid.value = user.uid;
-  username.value = user.displayName || "user_" + user.uid.slice(0,6);
-
-  const snap = await getDoc(doc(db, "users", user.uid));
-  if (snap.exists()) {
-    userData = snap.data();
-    name.value = userData.name || "";
-    age.value = userData.age || "";
-    theme.value = userData.theme || "light";
-    if (userData.photo) avatar.src = userData.photo;
-
-    if (userData.nameChangedCount >= 1) {
-      name.readOnly = true;
-      document.getElementById("name-lock-hint").style.display = "block";
+/* ================= THEME APPLICATION ================= */
+// 10. Theme application: Apply theme to body
+function applyTheme(theme) {
+    if (theme === 'dark') {
+        document.body.classList.add('dark');
+    } else {
+        document.body.classList.remove('dark');
     }
+}
+
+/* ================= SESSION PERSISTENCE ================= */
+// 3. Session persistence: Read from session first for instant UI
+async function initFromSession() {
+    const sessionData = await getSession();
+    if (sessionData) {
+        nameInput.value = sessionData.name || "";
+        themeSelect.value = sessionData.theme || "light";
+        if (sessionData.avatar) avatar.src = sessionData.avatar;
+        applyTheme(sessionData.theme);
+    }
+}
+initFromSession();
+
+/* ================= AUTH & DATA SYNC ================= */
+auth.onAuthStateChanged(async (user) => {
+  if (!user) {
+    // 5. Logout flow: Consistent redirect to Login.html
+    window.location.href = "Login.html";
+    return;
+  }
+  
+  currentUser = user;
+  uidInput.value = user.uid;
+  usernameInput.value = user.displayName || "user_" + user.uid.slice(0,6);
+
+  try {
+    const snap = await getDoc(doc(db, "users", user.uid));
+    if (snap.exists()) {
+      userDataFromDB = snap.data();
+      
+      // Sync UI with DB
+      nameInput.value = userDataFromDB.name || "";
+      ageInput.value = userDataFromDB.age || "";
+      themeSelect.value = userDataFromDB.theme || "light";
+      if (userDataFromDB.photo) avatar.src = userDataFromDB.photo;
+      
+      // 6. Age field rule: Age must be non-editable
+      // 8. UID immutability: Handled by 'readonly' attribute in HTML
+      
+      // 7. Name change rule: Check if name was already changed
+      if (userDataFromDB.nameChangedCount >= 1) {
+          nameInput.readOnly = true;
+          document.getElementById('name-lock-hint').style.display = 'block';
+      }
+
+      applyTheme(userDataFromDB.theme);
+      
+      // 4. Session updates: Sync IndexedDB
+      saveSession({
+          name: userDataFromDB.name,
+          theme: userDataFromDB.theme,
+          avatar: userDataFromDB.photo
+      });
+    }
+  } catch (err) {
+    console.error("Sync Error:", err);
   }
 });
 
-/* ---------------- SAVE PERSONAL ---------------- */
-savePersonal.onclick = async () => {
-  const update = {};
-  if (name.value !== userData?.name) {
-    if (userData?.nameChangedCount >= 1) return alert("Name locked");
-    update.name = name.value;
-    update.nameChangedCount = 1;
+/* ================= IMAGE PICK ================= */
+avatar.onclick = () => photoInput.click();
+photoInput.onchange = () => {
+  if (photoInput.files[0]) {
+    const reader = new FileReader();
+    reader.onload = (e) => avatar.src = e.target.result;
+    reader.readAsDataURL(photoInput.files[0]);
   }
-
-  if (photo.files[0]) {
-    const r = ref(storage, `profiles/${currentUser.uid}.jpg`);
-    await uploadBytes(r, photo.files[0]);
-    update.photo = await getDownloadURL(r);
-  }
-
-  if (Object.keys(update).length)
-    await setDoc(doc(db,"users",currentUser.uid), update, {merge:true});
-
-  alert("Saved");
 };
 
-/* ---------------- SUPPORT ---------------- */
-function initSupport() {
-  if (unsubscribeSupport) return;
-  const q = query(collection(db,"support"), where("uid","==",currentUser.uid), orderBy("time","desc"));
-  unsubscribeSupport = onSnapshot(q, s => {
-    supportList.innerHTML = "";
-    s.forEach(d => supportList.innerHTML += `<div>${d.data().message}</div>`);
-  });
+/* ================= SAVE PERSONAL ================= */
+document.getElementById("savePersonal").onclick = async () => {
+  if (!currentUser) return;
+  
+  const btn = document.getElementById("savePersonal");
+  btn.disabled = true;
+  btn.innerText = "Saving...";
+
+  const updateData = {};
+  
+  // 7. Name change logic
+  if (nameInput.value !== (userDataFromDB?.name || "")) {
+      if ((userDataFromDB?.nameChangedCount || 0) >= 1) {
+          alert("Name can only be changed once.");
+          btn.disabled = false;
+          btn.innerText = "Save Personal Info";
+          return;
+      }
+      updateData.name = nameInput.value;
+      updateData.nameChangedCount = (userDataFromDB?.nameChangedCount || 0) + 1;
+  }
+
+  try {
+    // 9. Profile photo sync: Upload and update session
+    if (photoInput.files[0]) {
+      const imgRef = ref(storage, `profiles/${currentUser.uid}.jpg`);
+      await uploadBytes(imgRef, photoInput.files[0]);
+      const url = await getDownloadURL(imgRef);
+      updateData.photo = url;
+      avatar.src = url;
+    }
+    
+    if (Object.keys(updateData).length > 0) {
+        await setDoc(doc(db, "users", currentUser.uid), updateData, { merge: true });
+        
+        // Update local state and session
+        userDataFromDB = { ...userDataFromDB, ...updateData };
+        saveSession({ 
+            name: userDataFromDB.name, 
+            avatar: userDataFromDB.photo || avatar.src 
+        });
+        
+        if (userDataFromDB.nameChangedCount >= 1) {
+            nameInput.readOnly = true;
+            document.getElementById('name-lock-hint').style.display = 'block';
+        }
+        alert("Personal info updated ✅");
+    }
+  } catch(err) {
+    alert("Save Error: " + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerText = "Save Personal Info";
+  }
+};
+
+/* ================= SAVE APP ================= */
+document.getElementById("saveApp").onclick = async () => {
+  if (!currentUser) return;
+  const newTheme = themeSelect.value;
+  try {
+    await setDoc(doc(db, "users", currentUser.uid), { theme: newTheme }, { merge: true });
+    saveSession({ theme: newTheme });
+    applyTheme(newTheme);
+    alert("Theme saved ✅");
+  } catch(err) {
+    alert("Error saving theme");
+  }
+};
+
+/* ================= SUPPORT ================= */
+function initSupportListener() {
+    if (!currentUser) return;
+    
+    // 11. Support message scope: Scoped to current user for security/efficiency
+    const q = query(
+        collection(db, "support"), 
+        where("uid", "==", currentUser.uid),
+        orderBy("time", "desc")
+    );
+    
+    unsubscribeSupport = onSnapshot(q, (snap) => {
+        supportList.innerHTML = "";
+        snap.forEach(docu => {
+            const data = docu.data();
+            const div = document.createElement("div");
+            div.className = "support-item";
+            const time = data.time ? new Date(data.time.seconds * 1000).toLocaleString() : "Sending...";
+            div.innerHTML = `<span class="support-time">${time}</span><div>${data.message}</div>`;
+            supportList.appendChild(div);
+        });
+    }, (err) => {
+        console.error("Support Listener Error:", err);
+    });
 }
 
-/* ---------------- LOGOUT ---------------- */
-logoutBtn.onclick = async () => {
-  await logoutUser();
-  location.href = "Login.html";
+document.getElementById("sendSupport").onclick = async () => {
+  if (!currentUser) return;
+  const msg = supportMessage.value.trim();
+  if (!msg) return;
+
+  try {
+    await addDoc(collection(db, "support"), {
+      uid: currentUser.uid,
+      message: msg,
+      time: serverTimestamp()
+    });
+    supportMessage.value = "";
+  } catch(err) {
+    alert("Error sending message");
+  }
+};
+
+/* ================= LOGOUT ================= */
+document.getElementById("logoutBtn").onclick = async () => {
+  try {
+    // 5. Logout flow: Centralized logic via auth.js
+    await logoutUser();
+    // Redirect is handled by onAuthStateChanged, but explicit redirect here for safety
+    window.location.href = "Login.html";
+  } catch(err) {
+    console.error("Logout error:", err);
+  }
 };
 </script>
+
 </body>
 </html>
