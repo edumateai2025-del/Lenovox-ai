@@ -157,9 +157,9 @@ label {
     <input id="name" placeholder="Full Name">
     <div id="name-lock-hint" class="lock-hint">Name can only be changed once.</div>
     
-    <label for="age">Age (Read-only)</label>
-    <input id="age" type="number" readonly placeholder="Age">
-    <div id="age-lock-hint" class="lock-hint" style="display:block;">Age cannot be changed after registration.</div>
+    <label for="age">Age</label>
+    <input id="age" type="number" placeholder="Age">
+    <div id="age-lock-hint" class="lock-hint">Age can only be changed once.</div>
 
     <button id="savePersonal">Save Personal Info</button>
   </div>
@@ -186,11 +186,9 @@ label {
 </div>
 
 <script type="module">
-/* 1. Imports aligned with your auth.js and session.js */
 import { watchAuth, logoutUser, updateDisplayName } from './auth.js';
 import { getSession, saveSession } from './session.js';
 
-// We still need Firestore/Storage for direct data access in Settings
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { 
   getFirestore, doc, getDoc, setDoc, addDoc, collection, query, where, orderBy, onSnapshot, serverTimestamp 
@@ -199,8 +197,6 @@ import {
   getStorage, ref, uploadBytes, getDownloadURL 
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-/* ================= FIREBASE INIT (Internal for direct DB access) ================= */
-// Note: We use the same config as your auth.js to ensure consistency
 const firebaseConfig = {
   apiKey: "AIzaSyDnANsKUAZ1giXXdo-fKkFneMuKh0l0FCg",
   authDomain: "edumateai-6544b.firebaseapp.com",
@@ -213,12 +209,10 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-/* ================= STATE MANAGEMENT ================= */
 let currentUser = null;
 let unsubscribeSupport = null;
 let userDataFromDB = null;
 
-/* ================= TAB SWITCH ================= */
 const tabs = {
   "tab-personal": "content-personal",
   "tab-app": "content-app",
@@ -235,20 +229,14 @@ Object.keys(tabs).forEach(tabId => {
     btn.classList.add("active");
     document.getElementById(tabs[tabId]).classList.add("active");
     sessionStorage.setItem("lastTab", tabId);
-    
-    if (tabId === 'tab-support') {
-        initSupportListener();
-    } else if (unsubscribeSupport) {
-        unsubscribeSupport();
-        unsubscribeSupport = null;
-    }
+    if (tabId === 'tab-support') initSupportListener();
+    else if (unsubscribeSupport) { unsubscribeSupport(); unsubscribeSupport = null; }
   };
 });
 
 const lastTab = sessionStorage.getItem("lastTab") || "tab-personal";
 if (document.getElementById(lastTab)) document.getElementById(lastTab).click();
 
-/* ================= ELEMENTS ================= */
 const avatar = document.getElementById("avatar");
 const photoInput = document.getElementById("photo");
 const uidInput = document.getElementById("uid");
@@ -259,16 +247,11 @@ const themeSelect = document.getElementById("theme");
 const supportMessage = document.getElementById("supportMessage");
 const supportList = document.getElementById("supportList");
 
-/* ================= THEME APPLICATION ================= */
 function applyTheme(theme) {
-    if (theme === 'dark') {
-        document.body.classList.add('dark');
-    } else {
-        document.body.classList.remove('dark');
-    }
+    if (theme === 'dark') document.body.classList.add('dark');
+    else document.body.classList.remove('dark');
 }
 
-/* ================= SESSION PERSISTENCE ================= */
 async function initFromSession() {
     try {
         const sessionData = await getSession();
@@ -282,14 +265,11 @@ async function initFromSession() {
 }
 initFromSession();
 
-/* ================= AUTH & DATA SYNC ================= */
-// Using watchAuth from your auth.js
 watchAuth(async (user) => {
   if (!user) {
     window.location.href = "Login.html";
     return;
   }
-  
   currentUser = user;
   uidInput.value = user.uid;
   usernameInput.value = user.displayName || "user_" + user.uid.slice(0,6);
@@ -298,7 +278,6 @@ watchAuth(async (user) => {
     const snap = await getDoc(doc(db, "users", user.uid));
     if (snap.exists()) {
       userDataFromDB = snap.data();
-      
       nameInput.value = userDataFromDB.name || user.displayName || "";
       ageInput.value = userDataFromDB.age || "";
       themeSelect.value = userDataFromDB.theme || "light";
@@ -308,10 +287,11 @@ watchAuth(async (user) => {
           nameInput.readOnly = true;
           document.getElementById('name-lock-hint').style.display = 'block';
       }
-
+      if (userDataFromDB.ageChangedCount >= 1) {
+          ageInput.readOnly = true;
+          document.getElementById('age-lock-hint').style.display = 'block';
+      }
       applyTheme(userDataFromDB.theme);
-      
-      // Update session.js IndexedDB
       await saveSession({
           uid: user.uid,
           email: user.email,
@@ -320,12 +300,9 @@ watchAuth(async (user) => {
           theme: userDataFromDB.theme
       });
     }
-  } catch (err) {
-    console.error("Sync Error:", err);
-  }
+  } catch (err) { console.error("Sync Error:", err); }
 });
 
-/* ================= IMAGE PICK ================= */
 avatar.onclick = () => photoInput.click();
 photoInput.onchange = () => {
   if (photoInput.files[0]) {
@@ -335,17 +312,13 @@ photoInput.onchange = () => {
   }
 };
 
-/* ================= SAVE PERSONAL ================= */
 document.getElementById("savePersonal").onclick = async () => {
   if (!currentUser) return;
-  
   const btn = document.getElementById("savePersonal");
   btn.disabled = true;
   btn.innerText = "Saving...";
 
   const updateData = {};
-  
-  // Name change logic
   if (nameInput.value !== (userDataFromDB?.name || currentUser.displayName || "")) {
       if ((userDataFromDB?.nameChangedCount || 0) >= 1) {
           alert("Name can only be changed once.");
@@ -355,11 +328,18 @@ document.getElementById("savePersonal").onclick = async () => {
       }
       updateData.name = nameInput.value;
       updateData.nameChangedCount = (userDataFromDB?.nameChangedCount || 0) + 1;
-      
-      // Update Firebase Auth profile via your auth.js function
-      try {
-          await updateDisplayName(nameInput.value);
-      } catch (e) { console.error("Auth Profile Update Error:", e); }
+      try { await updateDisplayName(nameInput.value); } catch (e) { console.error(e); }
+  }
+
+  if (ageInput.value !== (userDataFromDB?.age || "")) {
+      if ((userDataFromDB?.ageChangedCount || 0) >= 1) {
+          alert("Age can only be changed once.");
+          btn.disabled = false;
+          btn.innerText = "Save Personal Info";
+          return;
+      }
+      updateData.age = ageInput.value;
+      updateData.ageChangedCount = (userDataFromDB?.ageChangedCount || 0) + 1;
   }
 
   try {
@@ -373,10 +353,7 @@ document.getElementById("savePersonal").onclick = async () => {
     
     if (Object.keys(updateData).length > 0) {
         await setDoc(doc(db, "users", currentUser.uid), updateData, { merge: true });
-        
         userDataFromDB = { ...userDataFromDB, ...updateData };
-        
-        // Sync session.js
         await saveSession({
             uid: currentUser.uid,
             email: currentUser.email,
@@ -384,14 +361,20 @@ document.getElementById("savePersonal").onclick = async () => {
             photoURL: userDataFromDB.photo || currentUser.photoURL || "",
             theme: userDataFromDB.theme || themeSelect.value
         });
-        
         if (userDataFromDB.nameChangedCount >= 1) {
             nameInput.readOnly = true;
             document.getElementById('name-lock-hint').style.display = 'block';
         }
+        if (userDataFromDB.ageChangedCount >= 1) {
+            ageInput.readOnly = true;
+            document.getElementById('age-lock-hint').style.display = 'block';
+        }
         alert("Personal info updated ✅");
+    } else {
+        alert("No changes to save.");
     }
   } catch(err) {
+    console.error("Save Error:", err);
     alert("Save Error: " + err.message);
   } finally {
     btn.disabled = false;
@@ -399,14 +382,14 @@ document.getElementById("savePersonal").onclick = async () => {
   }
 };
 
-/* ================= SAVE APP ================= */
 document.getElementById("saveApp").onclick = async () => {
   if (!currentUser) return;
+  const btn = document.getElementById("saveApp");
+  btn.disabled = true;
+  btn.innerText = "Saving...";
   const newTheme = themeSelect.value;
   try {
     await setDoc(doc(db, "users", currentUser.uid), { theme: newTheme }, { merge: true });
-    
-    // Update session
     await saveSession({
         uid: currentUser.uid,
         email: currentUser.email,
@@ -414,24 +397,19 @@ document.getElementById("saveApp").onclick = async () => {
         photoURL: avatar.src,
         theme: newTheme
     });
-    
     applyTheme(newTheme);
     alert("Theme saved ✅");
   } catch(err) {
-    alert("Error saving theme");
+    alert("Error saving theme: " + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerText = "Save App Settings";
   }
 };
 
-/* ================= SUPPORT ================= */
 function initSupportListener() {
     if (!currentUser) return;
-    
-    const q = query(
-        collection(db, "support"), 
-        where("uid", "==", currentUser.uid),
-        orderBy("time", "desc")
-    );
-    
+    const q = query(collection(db, "support"), where("uid", "==", currentUser.uid), orderBy("time", "desc"));
     unsubscribeSupport = onSnapshot(q, (snap) => {
         supportList.innerHTML = "";
         snap.forEach(docu => {
@@ -442,37 +420,24 @@ function initSupportListener() {
             div.innerHTML = `<span class="support-time">${time}</span><div>${data.message}</div>`;
             supportList.appendChild(div);
         });
-    }, (err) => {
-        console.error("Support Listener Error:", err);
-    });
+    }, (err) => { console.error("Support Listener Error:", err); });
 }
 
 document.getElementById("sendSupport").onclick = async () => {
   if (!currentUser) return;
   const msg = supportMessage.value.trim();
   if (!msg) return;
-
   try {
-    await addDoc(collection(db, "support"), {
-      uid: currentUser.uid,
-      message: msg,
-      time: serverTimestamp()
-    });
+    await addDoc(collection(db, "support"), { uid: currentUser.uid, message: msg, time: serverTimestamp() });
     supportMessage.value = "";
-  } catch(err) {
-    alert("Error sending message");
-  }
+  } catch(err) { alert("Error sending message: " + err.message); }
 };
 
-/* ================= LOGOUT ================= */
 document.getElementById("logoutBtn").onclick = async () => {
   try {
     await logoutUser();
-    // Redirect is handled by watchAuth, but explicit for safety
     window.location.href = "Login.html";
-  } catch(err) {
-    console.error("Logout error:", err);
-  }
+  } catch(err) { console.error("Logout error:", err); }
 };
 </script>
 
