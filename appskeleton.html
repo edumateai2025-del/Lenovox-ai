@@ -2,21 +2,21 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>EduMateAI - Kids Learning Hub</title>
 
-<!-- Font Awesome for Icons -->
+<!-- Font Awesome for Pro Icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
   :root {
-    --nav-height: 85px;
-    --primary-blue: #4776E6;
-    --primary-purple: #8E54E9;
-    --bg-color: #f0f4f8;
-    --nav-bg: #ffffff;
-    --accent-orange: #FF8E53;
-    --accent-red: #FF6B6B;
+    --nav-height: 80px;
+    --primary-blue: #007AFF;
+    --primary-purple: #AF52DE;
+    --bg-color: #F2F2F7;
+    --nav-bg: rgba(255, 255, 255, 0.95);
+    --accent-orange: #FF9500;
+    --accent-red: #FF3B30;
   }
 
   * {
@@ -29,86 +29,73 @@
     padding: 0;
     height: 100%;
     width: 100%;
-    font-family: 'Comic Sans MS', 'Chalkboard SE', 'Inter', system-ui, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background: var(--bg-color);
-    overflow: hidden; /* Critical: Prevent body from scrolling */
+    overflow: hidden; /* Lock the body to prevent double-scrolling */
   }
 
-  /* MAIN LAYOUT CONTAINER - FLEXBOX */
-  .app-container {
+  /* MASTER CONTAINER */
+  .app-shell {
     display: flex;
     flex-direction: column;
-    height: 100vh; /* Full viewport height */
+    height: 100vh;
     width: 100%;
-  }
-
-  /* CONTENT AREA - This resizes to leave space for the Nav Bar */
-  .main-content {
-    flex: 1; /* Takes up all available space above the nav */
     position: relative;
-    width: 100%;
-    overflow: hidden;
-    background: #fff;
   }
 
+  /* CONTENT WINDOW - THIS IS THE FIX */
+  /* It strictly takes up all space MINUS the navigation bar */
+  .content-window {
+    flex: 1;
+    width: 100%;
+    position: relative;
+    background: #fff;
+    overflow: hidden;
+  }
+
+  /* SECTION WRAPPERS */
   .section {
-    display: none;
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
+    display: none; /* Hidden by default */
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
   }
 
   .section.active {
     display: block;
+    opacity: 1;
   }
 
+  /* IFRAME STYLING */
   iframe {
     width: 100%;
     height: 100%;
     border: none;
     display: block;
+    /* Ensure the iframe itself doesn't overflow */
+    overflow: auto;
   }
 
-  /* LOADER STYLE */
-  .loader {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: #fff;
-    z-index: 10;
-  }
-  .loader-icon {
-    width: 50px;
-    height: 50px;
-    border: 6px dashed var(--primary-blue);
-    border-radius: 50%;
-    animation: spin 2s linear infinite;
-  }
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-
-  /* BOTTOM NAVIGATION - 3D Kid-Friendly Style */
-  .bottom-nav {
+  /* PRO 3D NAVIGATION BAR */
+  .pro-nav {
     height: var(--nav-height);
     background: var(--nav-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     display: flex;
     justify-content: space-around;
     align-items: center;
-    box-shadow: 0 -10px 30px rgba(0,0,0,0.1);
-    border-top-left-radius: 30px;
-    border-top-right-radius: 30px;
-    padding: 0 10px;
-    padding-bottom: env(safe-area-inset-bottom); /* iPhone notch support */
-    z-index: 1000;
-    position: relative;
+    border-top: 1px solid rgba(0,0,0,0.05);
+    padding: 0 8px;
+    padding-bottom: env(safe-area-inset-bottom);
+    z-index: 9999;
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
   }
 
-  .nav-btn {
+  .nav-item {
     flex: 1;
     height: 100%;
     display: flex;
@@ -116,190 +103,190 @@
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    color: #94a3b8;
+    color: #8E8E93;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
   }
 
-  /* 3D Icon Box */
-  .icon-box {
-    width: 44px;
-    height: 44px;
+  /* 3D Icon Effect */
+  .icon-wrapper {
+    width: 40px;
+    height: 40px;
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: 15px;
-    margin-bottom: 5px;
-    transition: all 0.3s;
     font-size: 22px;
-    box-shadow: 0 4px 0 rgba(0,0,0,0.05);
+    border-radius: 12px;
+    margin-bottom: 4px;
+    transition: inherit;
   }
 
-  .nav-btn span {
-    font-size: 11px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+  .nav-item span {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
   }
 
-  /* Active State Styling */
-  .nav-btn.active {
+  /* Active Tab Styling */
+  .nav-item.active {
     color: var(--primary-blue);
-    transform: translateY(-8px);
   }
 
-  .nav-btn.active .icon-box {
-    background: #e0f2fe;
+  .nav-item.active .icon-wrapper {
+    transform: scale(1.1) translateY(-2px);
     color: var(--primary-blue);
-    box-shadow: 0 6px 0 #bae6fd;
+    /* Subtle 3D glow */
+    filter: drop-shadow(0 4px 8px rgba(0, 122, 255, 0.3));
   }
 
-  /* MIDDLE 3D GAME BUTTON (PLAY) */
-  .nav-btn.middle {
-    flex: 0 0 80px;
-    z-index: 1001;
+  /* CENTER GAME BUTTON - SUPER 3D */
+  .nav-item.center-play {
+    flex: 0 0 70px;
+    margin-top: -35px; /* Float high */
   }
 
-  .middle .icon-box {
-    width: 65px;
-    height: 65px;
-    background: linear-gradient(135deg, var(--accent-red), var(--accent-orange));
+  .center-play .icon-wrapper {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(180deg, #FF5E5E 0%, #FF2D55 100%);
     color: #fff;
     border-radius: 50%;
-    font-size: 32px;
-    margin-top: -50px; /* Floating effect */
-    border: 6px solid #fff;
-    box-shadow: 0 12px 24px rgba(255, 107, 107, 0.4), 0 8px 0 #e64a4a;
+    font-size: 30px;
+    border: 4px solid #fff;
+    box-shadow: 
+      0 10px 20px rgba(255, 45, 85, 0.4),
+      inset 0 -4px 0 rgba(0,0,0,0.2),
+      0 4px 0 #D00036; /* 3D Bottom Edge */
   }
 
-  .nav-btn.middle.active .icon-box {
-    transform: scale(1.15);
-    box-shadow: 0 15px 30px rgba(255, 107, 107, 0.5), 0 5px 0 #e64a4a;
+  .nav-item.center-play.active .icon-wrapper {
+    transform: scale(1.05) translateY(2px);
+    box-shadow: 
+      0 5px 10px rgba(255, 45, 85, 0.3),
+      inset 0 -2px 0 rgba(0,0,0,0.2),
+      0 2px 0 #D00036;
   }
 
-  /* MEETUP SECTION (INLINE PORTAL) */
-  #social {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  /* LOADER */
+  .skeleton-loader {
+    position: absolute;
+    inset: 0;
+    background: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 5;
+  }
+  .spinner {
+    width: 30px;
+    height: 30px;
+    border: 3px solid #E5E5EA;
+    border-top-color: var(--primary-blue);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* MEETUP PORTAL */
+  #social-portal {
+    background: linear-gradient(135deg, #5856D6 0%, #AF52DE 100%);
     color: #fff;
-    padding: 50px 30px;
-    overflow-y: auto;
-    text-align: center;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    text-align: center;
+    padding: 20px;
   }
-  .social-card {
+  .portal-card {
     background: rgba(255,255,255,0.15);
-    backdrop-filter: blur(15px);
-    border-radius: 25px;
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
     padding: 30px;
-    margin-top: 25px;
-    border: 1px solid rgba(255,255,255,0.3);
     width: 100%;
-    max-width: 400px;
-  }
-  .social-card p {
-    font-size: 18px;
-    margin: 15px 0;
-    text-align: left;
-  }
-  .launch-badge {
-    margin-top: 40px;
-    font-weight: 900;
-    background: #fff;
-    color: #764ba2;
-    display: inline-block;
-    padding: 12px 25px;
-    border-radius: 50px;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-    font-size: 18px;
+    max-width: 320px;
+    border: 1px solid rgba(255,255,255,0.2);
   }
 </style>
 </head>
 
 <body>
 
-<div class="app-container">
+<div class="app-shell">
   
-  <!-- MAIN CONTENT AREA -->
-  <main class="main-content">
+  <!-- DYNAMIC CONTENT WINDOW -->
+  <main class="content-window">
     
-    <!-- 1. DASHBOARD (HOME) -->
+    <!-- DASHBOARD -->
     <div id="dashboard" class="section active">
-      <div class="loader"><div class="loader-icon"></div></div>
-      <iframe src="userdashboard.html" onload="this.previousElementSibling.remove()"></iframe>
+      <div class="skeleton-loader"><div class="spinner"></div></div>
+      <iframe src="userdashboard.html" onload="this.previousElementSibling.style.display='none'"></iframe>
     </div>
     
-    <!-- 2. AI BUDDY (GPT-5 NANO CHAT) -->
-    <div id="ai-chat" class="section">
-      <div class="loader"><div class="loader-icon"></div></div>
-      <iframe src="ai-chat-bot-assitant.html" onload="this.previousElementSibling.remove()"></iframe>
+    <!-- AI BUDDY -->
+    <div id="ai-buddy" class="section">
+      <div class="skeleton-loader"><div class="spinner"></div></div>
+      <iframe src="ai-chat-bot-assitant.html" onload="this.previousElementSibling.style.display='none'"></iframe>
     </div>
     
-    <!-- 3. GAMES (FUN ZONE) -->
-    <div id="games" class="section">
-      <div class="loader"><div class="loader-icon"></div></div>
-      <iframe src="gaming-section.html" onload="this.previousElementSibling.remove()"></iframe>
+    <!-- GAMES -->
+    <div id="gaming" class="section">
+      <div class="skeleton-loader"><div class="spinner"></div></div>
+      <iframe src="gaming-section.html" onload="this.previousElementSibling.style.display='none'"></iframe>
     </div>
     
-    <!-- 4. MEETUP (COMMUNITY PORTAL) -->
-    <div id="social" class="section">
-      <div style="font-size: 80px; margin-bottom: 20px; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.3));">🛸</div>
-      <h2 style="font-size: 36px; margin: 0; font-weight: 900; text-shadow: 0 4px 10px rgba(0,0,0,0.2);">MeetUp AI</h2>
-      <p style="opacity: 0.9; font-size: 20px;">Collaborate, Learn & Grow Together!</p>
-      
-      <div class="social-card">
-        <div>
-          <p>🌟 Study with Besties</p>
-          <p>📚 Share Magic Notes</p>
-          <p>🤖 AI Study Buddies</p>
-          <p>🛡️ 100% Safe & Fun</p>
+    <!-- MEETUP -->
+    <div id="meetup" class="section">
+      <div id="social-portal" style="height: 100%;">
+        <div style="font-size: 70px; margin-bottom: 10px;">🪐</div>
+        <h2 style="font-size: 32px; margin: 0; font-weight: 800;">MeetUp AI</h2>
+        <p style="opacity: 0.8; font-size: 16px;">The ultimate kids community.</p>
+        
+        <div class="portal-card" style="margin-top: 20px;">
+          <div style="text-align: left; font-size: 15px;">
+            <p>🚀 Team up for Quizzes</p>
+            <p>🤝 Make new Study Buddies</p>
+            <p>🛡️ Secure & Kid-Safe</p>
+          </div>
+        </div>
+        
+        <div style="margin-top: 30px; background: #fff; color: #5856D6; padding: 12px 24px; border-radius: 50px; font-weight: 800; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
+          Dec 16, 2026
         </div>
       </div>
-      
-      <div class="launch-badge">
-        🚀 Launching: Dec 16, 2026
-      </div>
     </div>
     
-    <!-- 5. MAGIC (SETTINGS) -->
-    <div id="settings" class="section">
-      <div class="loader"><div class="loader-icon"></div></div>
-      <iframe src="lenovox-settings.html" onload="this.previousElementSibling.remove()"></iframe>
+    <!-- SETTINGS -->
+    <div id="magic-settings" class="section">
+      <div class="skeleton-loader"><div class="spinner"></div></div>
+      <iframe src="lenovox-settings.html" onload="this.previousElementSibling.style.display='none'"></iframe>
     </div>
 
   </main>
 
-  <!-- BOTTOM NAVIGATION BAR -->
-  <nav class="bottom-nav">
-    <!-- Home / Dashboard -->
-    <div class="nav-btn active" data-target="dashboard">
-      <div class="icon-box"><i class="fas fa-house-chimney"></i></div>
+  <!-- PROFESSIONAL 3D NAVIGATION -->
+  <nav class="pro-nav">
+    <div class="nav-item active" data-target="dashboard">
+      <div class="icon-wrapper"><i class="fas fa-grid-2"></i></div>
       <span>Home</span>
     </div>
 
-    <!-- AI Buddy / Chat -->
-    <div class="nav-btn" data-target="ai-chat">
-      <div class="icon-box"><i class="fas fa-robot"></i></div>
+    <div class="nav-item" data-target="ai-buddy">
+      <div class="icon-wrapper"><i class="fas fa-face-smile-beam"></i></div>
       <span>AI Buddy</span>
     </div>
 
-    <!-- Play / Games (Middle Floating Button) -->
-    <div class="nav-btn middle" data-target="games">
-      <div class="icon-box"><i class="fas fa-gamepad"></i></div>
-      <span>Play</span>
+    <div class="nav-item center-play" data-target="gaming">
+      <div class="icon-wrapper"><i class="fas fa-gamepad-modern"></i></div>
     </div>
 
-    <!-- MeetUp -->
-    <div class="nav-btn" data-target="social">
-      <div class="icon-box"><i class="fas fa-user-group"></i></div>
+    <div class="nav-item" data-target="meetup">
+      <div class="icon-wrapper"><i class="fas fa-planet-ringed"></i></div>
       <span>MeetUp</span>
     </div>
 
-    <!-- Magic / Settings -->
-    <div class="nav-btn" data-target="settings">
-      <div class="icon-box"><i class="fas fa-wand-sparkles"></i></div>
+    <div class="nav-item" data-target="magic-settings">
+      <div class="icon-wrapper"><i class="fas fa-sparkles"></i></div>
       <span>Magic</span>
     </div>
   </nav>
@@ -307,39 +294,38 @@
 </div>
 
 <script>
-  const buttons = document.querySelectorAll('.nav-btn');
+  const navItems = document.querySelectorAll('.nav-item');
   const sections = document.querySelectorAll('.section');
 
-  // Navigation Logic
-  buttons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      // Haptic-like feedback for mobile
-      if (window.navigator.vibrate) window.navigator.vibrate(15);
+  // Handle Tab Switching
+  navItems.forEach(item => {
+    item.addEventListener('click', () => {
+      const target = item.dataset.target;
+      if (!target) return;
 
-      // 1. Reset all buttons
-      buttons.forEach(b => b.classList.remove('active'));
-      // 2. Activate clicked button
-      btn.classList.add('active');
+      // 1. Update Navigation UI
+      navItems.forEach(nav => nav.classList.remove('active'));
+      item.classList.add('active');
 
-      // 3. Switch sections
-      const targetId = btn.dataset.target;
-      sections.forEach(s => {
-        s.classList.remove('active');
-        if (s.id === targetId) {
-          s.classList.add('active');
+      // 2. Switch Sections with smooth transition
+      sections.forEach(sec => {
+        sec.classList.remove('active');
+        if (sec.id === target) {
+          sec.classList.add('active');
         }
       });
+
+      // 3. Optional: Haptic Feedback
+      if (window.navigator.vibrate) window.navigator.vibrate(10);
     });
   });
 
-  // Viewport Height Fix for Mobile Browsers (iOS Chrome/Safari)
-  const fixViewportHeight = () => {
-    let vh = window.innerHeight * 0.01;
-    document.documentElement.style.setProperty('--vh', `${vh}px`);
-  };
-  window.addEventListener('resize', fixViewportHeight);
-  fixViewportHeight();
+  // Dynamic Viewport Height Fix for Mobile (handles the browser address bar)
+  function adjustAppHeight() {
+    document.querySelector('.app-shell').style.height = window.innerHeight + 'px';
+  }
+  window.addEventListener('resize', adjustAppHeight);
+  adjustAppHeight();
 </script>
 
-</body>
-</html>
+                                  </body>
