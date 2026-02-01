@@ -2,25 +2,64 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EduMateAI Skeleton App</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>EduMateAI - Kids Learning Hub</title>
 
+<!-- Font Awesome for Icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
-  body {
-    margin: 0;
-    font-family: Inter, system-ui, sans-serif;
-    background: #f5f5f7;
-    padding-bottom: 75px;
+  :root {
+    --nav-height: 85px;
+    --primary-blue: #4776E6;
+    --primary-purple: #8E54E9;
+    --bg-color: #f0f4f8;
+    --nav-bg: #ffffff;
+    --accent-orange: #FF8E53;
+    --accent-red: #FF6B6B;
   }
 
-  /* SECTIONS */
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    font-family: 'Comic Sans MS', 'Chalkboard SE', 'Inter', system-ui, sans-serif;
+    background: var(--bg-color);
+    overflow: hidden; /* Critical: Prevent body from scrolling */
+  }
+
+  /* MAIN LAYOUT CONTAINER - FLEXBOX */
+  .app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh; /* Full viewport height */
+    width: 100%;
+  }
+
+  /* CONTENT AREA - This resizes to leave space for the Nav Bar */
+  .main-content {
+    flex: 1; /* Takes up all available space above the nav */
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background: #fff;
+  }
+
   .section {
     display: none;
-    height: calc(100vh - 75px);
-    position: relative;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
   }
+
   .section.active {
     display: block;
   }
@@ -29,169 +68,277 @@
     width: 100%;
     height: 100%;
     border: none;
+    display: block;
   }
 
-  /* LOADER */
+  /* LOADER STYLE */
   .loader {
     position: absolute;
     inset: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    background: #f5f5f7;
-    z-index: 5;
+    background: #fff;
+    z-index: 10;
   }
-  .loader::after {
-    content: "";
-    width: 40px;
-    height: 40px;
-    border: 5px solid #ddd;
-    border-top: 5px solid #1877f2;
+  .loader-icon {
+    width: 50px;
+    height: 50px;
+    border: 6px dashed var(--primary-blue);
     border-radius: 50%;
-    animation: spin 1s linear infinite;
+    animation: spin 2s linear infinite;
   }
   @keyframes spin {
     to { transform: rotate(360deg); }
   }
 
-  /* BOTTOM NAV */
+  /* BOTTOM NAVIGATION - 3D Kid-Friendly Style */
   .bottom-nav {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    height: 65px;
-    background: #fff;
+    height: var(--nav-height);
+    background: var(--nav-bg);
     display: flex;
     justify-content: space-around;
     align-items: center;
-    box-shadow: 0 -2px 10px rgba(0,0,0,.12);
-    border-top-left-radius: 14px;
-    border-top-right-radius: 14px;
-    z-index: 100;
+    box-shadow: 0 -10px 30px rgba(0,0,0,0.1);
+    border-top-left-radius: 30px;
+    border-top-right-radius: 30px;
+    padding: 0 10px;
+    padding-bottom: env(safe-area-inset-bottom); /* iPhone notch support */
+    z-index: 1000;
+    position: relative;
   }
 
   .nav-btn {
     flex: 1;
-    text-align: center;
-    font-size: 12px;
-    color: #6b7280;
+    height: 100%;
     display: flex;
     flex-direction: column;
+    justify-content: center;
     align-items: center;
     cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    color: #94a3b8;
+    position: relative;
   }
 
-  .nav-btn i {
-    font-size: 16px;
-  }
-
-  .nav-btn.active {
-    color: #1877f2;
-  }
-
-  /* MIDDLE BUTTON */
-  .nav-btn.middle {
-    background: linear-gradient(135deg,#ff3d70,#ff9a2b);
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    margin-top: -20px;
-    color: #fff;
-    box-shadow: 0 6px 15px rgba(0,0,0,.2);
+  /* 3D Icon Box */
+  .icon-box {
+    width: 44px;
+    height: 44px;
+    display: flex;
     justify-content: center;
+    align-items: center;
+    border-radius: 15px;
+    margin-bottom: 5px;
+    transition: all 0.3s;
+    font-size: 22px;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.05);
   }
 
-  /* MEETUP SECTION */
-  #social {
-    background: linear-gradient(135deg,#ff9a2b,#ff3d70,#6a11cb);
+  .nav-btn span {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Active State Styling */
+  .nav-btn.active {
+    color: var(--primary-blue);
+    transform: translateY(-8px);
+  }
+
+  .nav-btn.active .icon-box {
+    background: #e0f2fe;
+    color: var(--primary-blue);
+    box-shadow: 0 6px 0 #bae6fd;
+  }
+
+  /* MIDDLE 3D GAME BUTTON (PLAY) */
+  .nav-btn.middle {
+    flex: 0 0 80px;
+    z-index: 1001;
+  }
+
+  .middle .icon-box {
+    width: 65px;
+    height: 65px;
+    background: linear-gradient(135deg, var(--accent-red), var(--accent-orange));
     color: #fff;
-    padding: 30px 20px;
+    border-radius: 50%;
+    font-size: 32px;
+    margin-top: -50px; /* Floating effect */
+    border: 6px solid #fff;
+    box-shadow: 0 12px 24px rgba(255, 107, 107, 0.4), 0 8px 0 #e64a4a;
+  }
+
+  .nav-btn.middle.active .icon-box {
+    transform: scale(1.15);
+    box-shadow: 0 15px 30px rgba(255, 107, 107, 0.5), 0 5px 0 #e64a4a;
+  }
+
+  /* MEETUP SECTION (INLINE PORTAL) */
+  #social {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    padding: 50px 30px;
     overflow-y: auto;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .social-card {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(15px);
+    border-radius: 25px;
+    padding: 30px;
+    margin-top: 25px;
+    border: 1px solid rgba(255,255,255,0.3);
+    width: 100%;
+    max-width: 400px;
+  }
+  .social-card p {
+    font-size: 18px;
+    margin: 15px 0;
+    text-align: left;
+  }
+  .launch-badge {
+    margin-top: 40px;
+    font-weight: 900;
+    background: #fff;
+    color: #764ba2;
+    display: inline-block;
+    padding: 12px 25px;
+    border-radius: 50px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    font-size: 18px;
   }
 </style>
 </head>
 
 <body>
 
-<!-- DASHBOARD -->
-<div id="dashboard" class="section active">
-  <div class="loader"></div>
-  <iframe src="userdashboard.html" onload="this.previousElementSibling.remove()"></iframe>
-</div>
+<div class="app-container">
+  
+  <!-- MAIN CONTENT AREA -->
+  <main class="main-content">
+    
+    <!-- 1. DASHBOARD (HOME) -->
+    <div id="dashboard" class="section active">
+      <div class="loader"><div class="loader-icon"></div></div>
+      <iframe src="userdashboard.html" onload="this.previousElementSibling.remove()"></iframe>
+    </div>
+    
+    <!-- 2. AI BUDDY (GPT-5 NANO CHAT) -->
+    <div id="ai-chat" class="section">
+      <div class="loader"><div class="loader-icon"></div></div>
+      <iframe src="ai-chat-bot-assitant.html" onload="this.previousElementSibling.remove()"></iframe>
+    </div>
+    
+    <!-- 3. GAMES (FUN ZONE) -->
+    <div id="games" class="section">
+      <div class="loader"><div class="loader-icon"></div></div>
+      <iframe src="gaming-section.html" onload="this.previousElementSibling.remove()"></iframe>
+    </div>
+    
+    <!-- 4. MEETUP (COMMUNITY PORTAL) -->
+    <div id="social" class="section">
+      <div style="font-size: 80px; margin-bottom: 20px; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.3));">🛸</div>
+      <h2 style="font-size: 36px; margin: 0; font-weight: 900; text-shadow: 0 4px 10px rgba(0,0,0,0.2);">MeetUp AI</h2>
+      <p style="opacity: 0.9; font-size: 20px;">Collaborate, Learn & Grow Together!</p>
+      
+      <div class="social-card">
+        <div>
+          <p>🌟 Study with Besties</p>
+          <p>📚 Share Magic Notes</p>
+          <p>🤖 AI Study Buddies</p>
+          <p>🛡️ 100% Safe & Fun</p>
+        </div>
+      </div>
+      
+      <div class="launch-badge">
+        🚀 Launching: Dec 16, 2026
+      </div>
+    </div>
+    
+    <!-- 5. MAGIC (SETTINGS) -->
+    <div id="settings" class="section">
+      <div class="loader"><div class="loader-icon"></div></div>
+      <iframe src="lenovox-settings.html" onload="this.previousElementSibling.remove()"></iframe>
+    </div>
 
-<!-- AI CHAT -->
-<div id="ai-chat" class="section">
-  <div class="loader"></div>
-  <iframe src="ai-chat-bot-assitant.html" onload="this.previousElementSibling.remove()"></iframe>
-</div>
+  </main>
 
-<!-- GAMES -->
-<div id="games" class="section">
-  <div class="loader"></div>
-  <iframe src="gaming-section.html" onload="this.previousElementSibling.remove()"></iframe>
-</div>
+  <!-- BOTTOM NAVIGATION BAR -->
+  <nav class="bottom-nav">
+    <!-- Home / Dashboard -->
+    <div class="nav-btn active" data-target="dashboard">
+      <div class="icon-box"><i class="fas fa-house-chimney"></i></div>
+      <span>Home</span>
+    </div>
 
-<!-- MEETUP (INLINE) -->
-<div id="social" class="section">
-  <h2>MeetUp by Lenovox AI</h2>
-  <p>A safe collaborative learning space for students.</p>
+    <!-- AI Buddy / Chat -->
+    <div class="nav-btn" data-target="ai-chat">
+      <div class="icon-box"><i class="fas fa-robot"></i></div>
+      <span>AI Buddy</span>
+    </div>
 
-  <ul>
-    <li>Study groups</li>
-    <li>Shared notes & resources</li>
-    <li>AI-assisted discussions</li>
-    <li>Moderated & secure</li>
-  </ul>
+    <!-- Play / Games (Middle Floating Button) -->
+    <div class="nav-btn middle" data-target="games">
+      <div class="icon-box"><i class="fas fa-gamepad"></i></div>
+      <span>Play</span>
+    </div>
 
-  <p><strong>Launch:</strong> December 16, 2026</p>
-</div>
+    <!-- MeetUp -->
+    <div class="nav-btn" data-target="social">
+      <div class="icon-box"><i class="fas fa-user-group"></i></div>
+      <span>MeetUp</span>
+    </div>
 
-<!-- SETTINGS -->
-<div id="settings" class="section">
-  <div class="loader"></div>
-  <iframe src="lenovox-settings.html" onload="this.previousElementSibling.remove()"></iframe>
-</div>
+    <!-- Magic / Settings -->
+    <div class="nav-btn" data-target="settings">
+      <div class="icon-box"><i class="fas fa-wand-sparkles"></i></div>
+      <span>Magic</span>
+    </div>
+  </nav>
 
-<!-- BOTTOM NAV -->
-<div class="bottom-nav">
-  <div class="nav-btn active" data-target="dashboard">
-    <i class="fas fa-home"></i>
-    <span>Dashboard</span>
-  </div>
-
-  <div class="nav-btn" data-target="ai-chat">
-    <i class="fas fa-robot"></i>
-    <span>AI</span>
-  </div>
-
-  <div class="nav-btn middle" data-target="games">
-    <i class="fas fa-gamepad"></i>
-  </div>
-
-  <div class="nav-btn" data-target="social">
-    <i class="fas fa-users"></i>
-    <span>MeetUp</span>
-  </div>
-
-  <div class="nav-btn" data-target="settings">
-    <i class="fas fa-cog"></i>
-    <span>Settings</span>
-  </div>
 </div>
 
 <script>
   const buttons = document.querySelectorAll('.nav-btn');
   const sections = document.querySelectorAll('.section');
 
+  // Navigation Logic
   buttons.forEach(btn => {
     btn.addEventListener('click', () => {
+      // Haptic-like feedback for mobile
+      if (window.navigator.vibrate) window.navigator.vibrate(15);
+
+      // 1. Reset all buttons
       buttons.forEach(b => b.classList.remove('active'));
+      // 2. Activate clicked button
       btn.classList.add('active');
 
-      sections.forEach(s => s.classList.remove('active'));
-      document.getElementById(btn.dataset.target).classList.add('active');
+      // 3. Switch sections
+      const targetId = btn.dataset.target;
+      sections.forEach(s => {
+        s.classList.remove('active');
+        if (s.id === targetId) {
+          s.classList.add('active');
+        }
+      });
     });
   });
+
+  // Viewport Height Fix for Mobile Browsers (iOS Chrome/Safari)
+  const fixViewportHeight = () => {
+    let vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+  };
+  window.addEventListener('resize', fixViewportHeight);
+  fixViewportHeight();
 </script>
 
 </body>
