@@ -3,12 +3,65 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lenovox AI - Personal AI Tutor</title>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body, html { font-family: 'Segoe UI', Arial, sans-serif; scroll-behavior: smooth; background: #fff; color: #111; }
+<title>Lenovox AI - The Future of Learning</title>
 
-  /* Hero Section */
+<!-- Font Awesome for Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --primary-glow: rgba(93, 63, 211, 0.7);
+    --accent-glow: rgba(0, 210, 255, 0.6);
+    --bg-dark: #020202;
+    --card-bg: rgba(255, 255, 255, 0.04);
+    --accent-blue: #00f2fe;
+    --accent-purple: #5d3fd3;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body, html {
+    width: 100%;
+    font-family: 'Inter', -apple-system, sans-serif;
+    background-color: var(--bg-dark);
+    color: white;
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+  }
+
+  /* BACKGROUND EFFECTS */
+  .bg-glow {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+      radial-gradient(circle at 15% 25%, var(--primary-glow) 0%, transparent 35%),
+      radial-gradient(circle at 85% 75%, var(--accent-glow) 0%, transparent 35%);
+    z-index: -1;
+    filter: blur(100px);
+    opacity: 0.45;
+  }
+
+  /* CANVAS FOR PARTICLES */
+  #particle-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  /* HERO SECTION */
   .hero {
     min-height: 100vh;
     display: flex;
@@ -16,229 +69,511 @@
     justify-content: center;
     align-items: center;
     text-align: center;
-    background: linear-gradient(135deg, #32a852, #ff6f91, #4a90e2);
-    color: white;
-    padding: 80px 20px 60px;
+    padding: 40px 25px;
     position: relative;
-    animation: heroFade 1.5s ease-in;
   }
 
-  .hero img {
+  .logo-container {
     position: absolute;
-    top: 20px;
-    left: 20px;
-    width: 80px;
-    height: 80px;
+    top: 25px;
+    left: 25px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 100;
+  }
+
+  .logo-img {
+    width: 50px;
+    height: 50px;
     border-radius: 12px;
+    box-shadow: 0 0 25px rgba(0, 242, 254, 0.4);
+    border: 1px solid rgba(255,255,255,0.1);
   }
 
-  .hero h1 {
-    font-size: 3rem;
-    font-weight: 800;
+  .brand-logo-text {
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: #fff;
+  }
+
+  /* THE GLOWING 3D ORB */
+  .orb-stage {
+    position: relative;
+    width: 320px;
+    height: 320px;
     margin-bottom: 20px;
-  }
-  .hero p {
-    font-size: 1.2rem;
-    max-width: 600px;
-    margin-bottom: 40px;
-  }
-  .hero .cta {
     display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-  }
-  .hero .cta a {
-    padding: 14px 40px;
-    font-size: 1.1rem;
-    font-weight: bold;
-    border-radius: 50px;
-    text-decoration: none;
-    transition: all 0.3s;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.2);
-  }
-  .signup { background-color: #fff; color: #32a852; }
-  .signup:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
-  .login { background-color: #000; color: #fff; }
-  .login:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
-
-  @keyframes heroFade { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-
-  /* Main Content */
-  .main { padding: 80px 20px; }
-  .section { max-width: 1200px; margin: 0 auto 80px; text-align: center; }
-  .section h2 { font-size: 2.5rem; margin-bottom: 20px; color: #32a852; }
-  .section p { font-size: 1.1rem; max-width: 800px; margin: 0 auto 50px; }
-
-  /* Feature Cards (vertical) */
-  .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; }
-  .feature-card {
-    background: #f9f9f9;
-    padding: 30px 20px;
-    border-radius: 20px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    transition: transform 0.4s, box-shadow 0.4s;
-    opacity: 0;
-    transform: translateY(20px);
-    animation: fadeUp 0.8s forwards;
-  }
-  .feature-card:nth-child(1) { animation-delay: 0.1s; }
-  .feature-card:nth-child(2) { animation-delay: 0.3s; }
-  .feature-card:nth-child(3) { animation-delay: 0.5s; }
-  .feature-card:nth-child(4) { animation-delay: 0.7s; }
-  .feature-card:nth-child(5) { animation-delay: 0.9s; }
-  .feature-card img { width: 100px; height: 100px; margin-bottom: 15px; }
-  .feature-card h3 { font-size: 1.4rem; margin-bottom: 10px; }
-  .feature-card p { font-size: 1rem; color: #333; line-height: 1.5; }
-  .feature-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
-
-  @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
-
-  /* Testimonials (Play Store style) */
-  .testimonials-list {
-    display: flex;
-    gap: 20px;
-    overflow-x: auto;
-    padding: 10px 0;
-    scroll-snap-type: x mandatory;
-  }
-  .testimonial-card {
-    flex: 0 0 320px;
-    background: #f0f4ff;
-    border-radius: 16px;
-    padding: 20px;
-    scroll-snap-align: start;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    transition: transform 0.3s, box-shadow 0.3s;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  .testimonial-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-  }
-  .testimonial-header {
-    display: flex;
-    gap: 15px;
+    justify-content: center;
     align-items: center;
   }
-  .testimonial-header img {
-    width: 60px;
-    height: 60px;
+
+  .orb {
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle at 30% 30%, #fff 0%, #4facfe 20%, #00f2fe 50%, #5d3fd3 100%);
     border-radius: 50%;
-    object-fit: cover;
+    box-shadow: 
+      0 0 60px rgba(0, 242, 254, 0.6),
+      0 0 120px rgba(93, 63, 211, 0.4),
+      inset -10px -10px 30px rgba(0,0,0,0.5);
+    animation: orbFloat 5s ease-in-out infinite;
+    z-index: 2;
   }
-  .author { font-weight: bold; font-size: 0.95rem; margin-bottom: 2px; }
-  .stars { color: #ffb400; font-size: 0.9rem; }
-  .review-text { font-size: 0.95rem; color: #333; line-height: 1.4; }
 
-  /* Scrollbar */
-  .testimonials-list::-webkit-scrollbar { height: 6px; }
-  .testimonials-list::-webkit-scrollbar-thumb { background: #32a852; border-radius: 10px; }
-
-  /* Footer */
-  footer { background: #32a852; color: #fff; text-align: center; padding: 40px 20px; }
-  footer a { color: #fff; font-weight: bold; margin: 0 10px; text-decoration: none; }
-
-  /* Mobile */
-  @media (max-width: 768px) {
-    .hero h1 { font-size: 2.2rem; }
-    .hero p { font-size: 1rem; }
-    .features { grid-template-columns: 1fr; }
-    .testimonial-card { flex: 0 0 260px; }
+  .orb-ring {
+    position: absolute;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 50%;
+    animation: ringRotate 12s linear infinite;
   }
+
+  .ring-1 { width: 220px; height: 220px; animation-duration: 10s; }
+  .ring-2 { width: 280px; height: 280px; animation-duration: 18s; animation-direction: reverse; }
+  
+  .floating-element {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: var(--accent-blue);
+    border-radius: 50%;
+    box-shadow: 0 0 15px var(--accent-blue);
+    animation: orbit 8s linear infinite;
+  }
+
+  @keyframes orbFloat {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-25px) scale(1.05); }
+  }
+
+  @keyframes ringRotate {
+    from { transform: rotate3d(1, 1, 0, 0deg); }
+    to { transform: rotate3d(1, 1, 0, 360deg); }
+  }
+
+  @keyframes orbit {
+    from { transform: rotate(0deg) translateX(130px) rotate(0deg); }
+    to { transform: rotate(360deg) translateX(130px) rotate(-360deg); }
+  }
+
+  .hero-h1 {
+    font-size: 46px;
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 20px;
+    background: linear-gradient(to bottom, #fff 40%, #888);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+  }
+
+  .hero-p {
+    font-size: 16px;
+    color: #999;
+    max-width: 320px;
+    margin-bottom: 40px;
+    line-height: 1.6;
+  }
+
+  /* CTA BUTTONS */
+  .cta-box {
+    width: 100%;
+    max-width: 350px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .btn-main {
+    background: #fff;
+    color: #000;
+    padding: 18px 25px;
+    border-radius: 50px;
+    font-weight: 900;
+    text-decoration: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 10px 40px rgba(255,255,255,0.2);
+    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .btn-main:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 15px 50px rgba(255,255,255,0.3);
+  }
+
+  .arrow-circle {
+    width: 42px;
+    height: 42px;
+    background: #000;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+  }
+
+  .btn-ghost {
+    background: rgba(255,255,255,0.05);
+    color: #fff;
+    padding: 16px;
+    border-radius: 50px;
+    font-weight: 700;
+    text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: 0.3s;
+    text-align: center;
+  }
+
+  .btn-ghost:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.3);
+  }
+
+  /* CONTENT SECTIONS */
+  .main-wrap {
+    padding: 80px 25px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .title-area {
+    text-align: center;
+    margin-bottom: 70px;
+  }
+
+  .title-area h2 {
+    font-size: 34px;
+    font-weight: 900;
+    background: linear-gradient(90deg, #fff, var(--accent-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 15px;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+  }
+
+  .feature-box {
+    background: var(--card-bg);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 30px;
+    padding: 40px 30px;
+    backdrop-filter: blur(15px);
+    transition: 0.5s;
+    text-align: center;
+  }
+
+  .feature-box:hover {
+    background: rgba(255,255,255,0.09);
+    transform: translateY(-12px);
+    border-color: var(--accent-blue);
+    box-shadow: 0 25px 50px rgba(0, 242, 254, 0.15);
+  }
+
+  .feature-box img {
+    width: 90px;
+    height: 90px;
+    margin-bottom: 25px;
+    filter: drop-shadow(0 15px 15px rgba(0,0,0,0.4));
+  }
+
+  .feature-box h3 {
+    font-size: 22px;
+    margin-bottom: 15px;
+    font-weight: 800;
+  }
+
+  .feature-box p {
+    font-size: 14px;
+    color: #aaa;
+    line-height: 1.6;
+  }
+
+  /* TESTIMONIALS SLIDER */
+  .reviews-wrap {
+    padding: 100px 0;
+    background: linear-gradient(to bottom, transparent, rgba(93, 63, 211, 0.05), transparent);
+  }
+
+  .scroll-x {
+    display: flex;
+    gap: 25px;
+    padding: 30px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .scroll-x::-webkit-scrollbar { display: none; }
+
+  .review-tile {
+    flex: 0 0 320px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 25px;
+    padding: 30px;
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+
+  .user-info img {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    border: 2px solid var(--accent-blue);
+    padding: 2px;
+  }
+
+  .user-details h4 { font-size: 15px; font-weight: 800; }
+  .user-details .stars { color: #FFD700; font-size: 12px; margin-top: 4px; }
+  .quote { font-size: 14px; color: #ccc; line-height: 1.5; font-style: italic; }
+
+  /* FOOTER */
+  footer {
+    padding: 80px 25px;
+    text-align: center;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    background: #000;
+  }
+
+  .footer-logo {
+    font-size: 24px;
+    font-weight: 900;
+    letter-spacing: 4px;
+    margin-bottom: 15px;
+    display: block;
+  }
+
+  .legal-links {
+    margin: 30px 0;
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    flex-wrap: wrap;
+  }
+
+  .legal-links a {
+    color: #666;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    transition: 0.3s;
+  }
+
+  .legal-links a:hover { color: #fff; }
+
+  .copyright {
+    color: #333;
+    font-size: 11px;
+    margin-top: 40px;
+  }
+
 </style>
 </head>
 <body>
 
-<!-- Hero -->
-<section class="hero">
-  <img src="https://i.postimg.cc/MTd0xxGM/grok-1767825639177-1.jpg" alt="Lenovox AI Logo">
-  <h1>Lenovox AI - Your Personal AI Tutor</h1>
-  <p>Empowering students with personalized AI learning, quizzes, games, and research tools.</p>
-  <div class="cta">
-    <a href="signup.html" class="signup">Sign Up</a>
-    <a href="login.html" class="login">Log In</a>
-  </div>
-</section>
+  <div class="bg-glow"></div>
+  <canvas id="particle-canvas"></canvas>
 
-<!-- Main Content -->
-<div class="main">
-  <!-- Features -->
-  <div class="section">
-    <h2>Why Choose Lenovox AI?</h2>
-    <p>Lenovox AI is designed for students worldwide to improve learning, stay engaged, and discover their purpose.</p>
-    <div class="features">
-      <div class="feature-card">
-        <img src="https://cdnai.iconscout.com/ai-image/premium/thumb/ai-ai-tutor-robot-with-book-and-lightbulb-3d-illustration-png-download-jpg-13186290.png" alt="AI Smart Tutor">
+  <!-- HERO SECTION -->
+  <section class="hero">
+    <!-- LOGO -->
+    <div class="logo-container">
+      <img src="https://i.postimg.cc/MTd0xxGM/grok-1767825639177-1.jpg" class="logo-img" alt="Lenovox Logo">
+      <span class="brand-logo-text">LENOVOX-AI</span>
+    </div>
+
+    <!-- 3D ANIMATED ORB STAGE -->
+    <div class="orb-stage">
+      <div class="orb-ring ring-1"></div>
+      <div class="orb-ring ring-2"></div>
+      <div class="floating-element" style="animation-delay: 0s;"></div>
+      <div class="floating-element" style="animation-delay: -2s; background: #fff; width: 5px; height: 5px;"></div>
+      <div class="floating-element" style="animation-delay: -5s; background: var(--accent-purple);"></div>
+      <div class="orb"></div>
+    </div>
+
+    <h1 class="hero-h1">Smart Help,<br>Just a Tap Away</h1>
+    <p class="hero-p">The futuristic AI tutor designed to empower students and master every subject effortlessly.</p>
+
+    <div class="cta-box">
+      <a href="signup.html" class="btn-main">
+        <span>Get Started Now</span>
+        <div class="arrow-circle">
+          <i class="fas fa-chevron-right"></i>
+        </div>
+      </a>
+      <a href="login.html" class="btn-ghost">Log In to Your Portal</a>
+    </div>
+  </section>
+
+  <!-- FEATURES SECTION -->
+  <div class="main-wrap">
+    <div class="title-area">
+      <h2>Futuristic Features</h2>
+      <p style="color: #555;">Advanced tools for the modern student.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-box">
+        <img src="https://cdnai.iconscout.com/ai-image/premium/thumb/ai-ai-tutor-robot-with-book-and-lightbulb-3d-illustration-png-download-jpg-13186290.png" alt="Smart Tutor">
         <h3>AI Smart Tutor</h3>
-        <p>Personalized guidance adapted to your learning style for faster mastery of subjects.</p>
+        <p>Get personalized guidance that evolves with your learning pace and style.</p>
       </div>
-      <div class="feature-card">
-        <img src="https://media.istockphoto.com/id/1407851581/vector/gaming-joysticks-and-gamepads-for-entertainment-and-video-games-steering-wheel-gaming.jpg?s=612x612&w=0&k=20&c=zbhbHoQaclnv-_wmDER837fNUWjtFt_XLqPxOqNWOGM=" alt="Game Section">
-        <h3>Game Section</h3>
-        <p>Engaging educational games that make learning interactive, fun, and effective.</p>
+      <div class="feature-box">
+        <img src="https://media.istockphoto.com/id/1407851581/vector/gaming-joysticks-and-gamepads-for-entertainment-and-video-games-steering-wheel-gaming.jpg?s=612x612&w=0&k=20&c=zbhbHoQaclnv-_wmDER837fNUWjtFt_XLqPxOqNWOGM=" alt="Games">
+        <h3>The Fun Zone</h3>
+        <p>Learn while you play with high-energy educational games and challenges.</p>
       </div>
-      <div class="feature-card">
-        <img src="https://media.istockphoto.com/id/1488144839/vector/quiz-logo-quiz-time-label-with-question-mark-quiz-emblem-for-business-marketing-and.jpg?s=612x612&w=0&k=20&c=eYgHRl9M7FtpLRCS-ZKABj3IU5E62cgGUTCY2HN5JO8=" alt="Quiz Generator">
-        <h3>Quiz Generator</h3>
-        <p>Create quizzes and track progress to reinforce knowledge and retention.</p>
+      <div class="feature-box">
+        <img src="https://media.istockphoto.com/id/1488144839/vector/quiz-logo-quiz-time-label-with-question-mark-quiz-emblem-for-business-marketing-and.jpg?s=612x612&w=0&k=20&c=eYgHRl9M7FtpLRCS-ZKABj3IU5E62cgGUTCY2HN5JO8=" alt="Quiz">
+        <h3>Quiz Master</h3>
+        <p>Instant quiz generation to sharpen your skills and track your academic growth.</p>
       </div>
-      <div class="feature-card">
-        <img src="https://www.shutterstock.com/shutterstock/photos/2170490219/display_1500/stock-vector-school-science-and-education-icons-microscope-atom-virus-test-tube-books-brain-light-bulb-2170490219.jpg" alt="AI Researcher">
-        <h3>AI Researcher</h3>
-        <p>Access research, study materials, and insights to deepen understanding.</p>
-      </div>
-      <div class="feature-card">
-        <img src="https://static.vecteezy.com/system/resources/previews/018/607/576/non_2x/20-news-blue-color-icon-for-presentation-free-vector.jpg" alt="News & Updates">
-        <h3>News & Updates</h3>
-        <p>Stay updated with the latest educational news, trends, and breakthroughs.</p>
+      <div class="feature-box">
+        <img src="https://static.vecteezy.com/system/resources/previews/018/607/576/non_2x/20-news-blue-color-icon-for-presentation-free-vector.jpg" alt="News">
+        <h3>Student Pulse</h3>
+        <p>Stay connected with the latest breakthroughs and news in global education.</p>
       </div>
     </div>
   </div>
 
-  <!-- Testimonials -->
-  <div class="section">
-    <h2>What Our Users Say</h2>
-    <p>Hear from students and parents who love Lenovox AI</p>
-    <div class="testimonials-list">
-      <div class="testimonial-card">
-        <div class="testimonial-header">
+  <!-- REVIEWS SECTION -->
+  <div class="reviews-wrap">
+    <div class="title-area">
+      <h2>Student Love</h2>
+      <p style="color: #555;">Real stories from students worldwide.</p>
+    </div>
+
+    <div class="scroll-x">
+      <div class="review-tile">
+        <div class="user-info">
           <img src="https://i.postimg.cc/Y9W8H0Pn/1767911864606.jpg" alt="Aisha">
-          <div>
-            <div class="author">Aisha • Student • Nigeria</div>
+          <div class="user-details">
+            <h4>Aisha • Nigeria</h4>
             <div class="stars">★★★★★</div>
           </div>
         </div>
-        <p class="review-text">"Lenovox AI has transformed my learning experience. Fun and effective!"</p>
+        <p class="quote">"Lenovox AI transformed my grades! The AI Buddy is so helpful for my math homework."</p>
       </div>
-      <div class="testimonial-card">
-        <div class="testimonial-header">
+
+      <div class="review-tile">
+        <div class="user-info">
           <img src="https://i.postimg.cc/85fFXrYS/1767913658035.jpg" alt="John">
-          <div>
-            <div class="author">John • Parent • USA</div>
+          <div class="user-details">
+            <h4>John • USA</h4>
             <div class="stars">★★★★★</div>
           </div>
         </div>
-        <p class="review-text">"My children are learning faster thanks to Lenovox AI's interactive tools."</p>
+        <p class="quote">"The best study tool I've ever used. The games make learning biology actually fun!"</p>
       </div>
-      <div class="testimonial-card">
-        <div class="testimonial-header">
+
+      <div class="review-tile">
+        <div class="user-info">
           <img src="https://i.postimg.cc/BnN1j3Fz/1767913296600.jpg" alt="Maria">
-          <div>
-            <div class="author">Maria • Student • Spain</div>
+          <div class="user-details">
+            <h4>Maria • Spain</h4>
             <div class="stars">★★★★★</div>
           </div>
         </div>
-        <p class="review-text">"Perfect for students worldwide! AI adapts to each learner’s needs."</p>
+        <p class="quote">"I love how it adapts to me. It's like having a private tutor in my pocket 24/7."</p>
       </div>
     </div>
   </div>
-</div>
 
-<!-- Footer -->
-<footer>
-  <p>© 2026 Lenovox AI • <a href="signup.html">Sign Up</a> • <a href="login.html">Log In</a></p>
-</footer>
+  <!-- FOOTER -->
+  <footer>
+    <span class="footer-logo">LENOVOX-AI</span>
+    <p style="color: #555; font-size: 13px;">Leading the revolution in student-centered AI.</p>
+    
+    <div class="legal-links">
+      <a href="signup.html">Sign Up</a>
+      <a href="login.html">Log In</a>
+      <a href="policy.html">Privacy Policy</a>
+      <a href="terms.html">Terms & Conditions</a>
+    </div>
+
+    <p class="copyright">© 2026 Lenovox AI. Designed for the future of education.</p>
+  </footer>
+
+  <script>
+    // PARTICLE SYSTEM SCRIPT
+    const canvas = document.getElementById('particle-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function initCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    class Particle {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 2 + 0.5;
+        this.speedX = (Math.random() - 0.5) * 0.5;
+        this.speedY = (Math.random() - 0.5) * 0.5;
+        this.opacity = Math.random() * 0.5 + 0.2;
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+          this.reset();
+        }
+      }
+      draw() {
+        ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function createParticles() {
+      particles = [];
+      for (let i = 0; i < 60; i++) {
+        particles.push(new Particle());
+      }
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('resize', initCanvas);
+    initCanvas();
+    createParticles();
+    animate();
+
+    // Subtle parallax for the orb
+    window.addEventListener('scroll', () => {
+      const orb = document.querySelector('.orb');
+      const scrolled = window.pageYOffset;
+      orb.style.transform = `translateY(${scrolled * 0.15}px)`;
+    });
+  </script>
 </body>
-             </html>
+</html>
