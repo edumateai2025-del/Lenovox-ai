@@ -3,225 +3,445 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Lenovox-ai – Sign in or sign up</title>
+<title>Lenovox-ai – Join the Universe</title>
+
+<!-- Font Awesome for Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+
 <style>
+  :root {
+    --space-bg: #03030b;
+    --nebula-purple: rgba(93, 63, 211, 0.4);
+    --nebula-blue: rgba(0, 210, 255, 0.3);
+    --accent-blue: #00d2ff;
+    --accent-purple: #9d50bb;
+    --glass: rgba(255, 255, 255, 0.05);
+  }
+
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: linear-gradient(160deg, #061a40 0%, #2b0f3f 100%);
-    color: white;
+  
+  body, html {
+    width: 100%;
     min-height: 100vh;
+    font-family: 'Inter', sans-serif;
+    background-color: var(--space-bg);
+    color: white;
+    overflow-x: hidden;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
-    padding: 40px 24px 60px;
-    transition: background 0.5s;
+    justify-content: center;
   }
-  .logo-container { text-align: center; margin-top: 80px; }
-  .logo { font-size: 50px; font-weight: 600; letter-spacing: -1px; margin-bottom: 12px; }
-  .circle { display: inline-block; width: 18px; height: 18px; background: linear-gradient(135deg, #ffb347, #ffcc33); border-radius: 50%; vertical-align: middle; margin-left: 4px; margin-bottom: 4px; }
-  .typing-text { font-size: 24px; font-weight: 500; opacity: 0.95; min-height: 36px; margin-top: 12px; letter-spacing: 0.4px; position: relative; }
-  .typing-text::after { content: "|"; margin-left: 4px; animation: blink 1s infinite; }
-  @keyframes blink { 50% { opacity: 0; } }
 
-  .buttons, .email-form-container { width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 14px; margin-top: 60px; }
-  .btn {
-    background: rgba(255, 255, 255, 0.12);
-    color: white;
-    border: none;
-    border-radius: 14px;
-    padding: 16px;
-    font-size: 17px;
+  /* UNIVERSE BACKGROUND */
+  .universe-bg {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: -2;
+    background: radial-gradient(circle at 50% 50%, #0a0a1a 0%, #03030b 100%);
+  }
+
+  .nebula {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: 
+      radial-gradient(circle at 20% 30%, var(--nebula-purple) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, var(--nebula-blue) 0%, transparent 50%);
+    z-index: -1;
+    filter: blur(80px);
+    opacity: 0.6;
+  }
+
+  #star-canvas {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  /* LOGO SECTION */
+  .logo-container {
+    text-align: center;
+    margin-bottom: 40px;
+    animation: fadeInDown 1s ease-out;
+  }
+
+  .logo {
+    font-size: 42px;
+    font-weight: 900;
+    letter-spacing: -1px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-shadow: 0 0 20px rgba(0, 210, 255, 0.5);
+  }
+
+  .circle {
+    width: 16px;
+    height: 16px;
+    background: linear-gradient(135deg, #ffb347, #ffcc33);
+    border-radius: 50%;
+    box-shadow: 0 0 15px #ffcc33;
+  }
+
+  .typing-text {
+    font-size: 18px;
     font-weight: 500;
+    color: #aaa;
+    min-height: 24px;
+    margin-top: 10px;
+  }
+
+  /* FORM & BUTTONS CONTAINER */
+  .auth-card {
+    width: 100%;
+    max-width: 400px;
+    padding: 40px 30px;
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    animation: fadeInUp 0.8s ease-out;
+  }
+
+  .auth-card h2 {
+    text-align: center;
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 10px;
+    background: linear-gradient(90deg, #fff, var(--accent-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* BUTTONS */
+  .btn {
+    width: 100%;
+    padding: 16px;
+    border-radius: 16px;
+    border: none;
+    font-size: 16px;
+    font-weight: 700;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 14px;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    transition: background 0.25s ease, transform 0.2s ease;
+    gap: 12px;
+    transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     text-decoration: none;
   }
-  .btn:hover { background: rgba(255, 255, 255, 0.18); transform: translateY(-1px); }
-  .btn-icon { width: 26px; height: 26px; object-fit: contain; transition: transform 0.35s ease, filter 0.35s ease; }
-  .btn:hover .btn-icon { transform: rotate(-8deg) scale(1.15); filter: brightness(1.1); }
-  .login-btn { background: transparent; border: 1px solid rgba(255,255,255,0.35); margin-top: 20px; }
-  .login-btn:hover { background: rgba(255,255,255,0.1); }
-  .safe-area-bottom { height: 40px; }
-  .indicator { width: 135px; height: 5px; background: rgba(255,255,255,0.45); border-radius: 999px; margin: 0 auto; }
-  .email-form-container {
-    display: none;
-    background: rgba(255,255,255,0.05);
-    backdrop-filter: blur(15px);
-    border-radius: 20px;
-    padding: 40px 24px;
-    text-align: center;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-    position: relative;
+
+  .btn-google {
+    background: white;
+    color: #000;
   }
-  .email-form-container h2 { margin: 16px 0 30px; font-weight: 500; font-size: 22px; color: #ffffffcc; }
-  .email-form-container form { display: flex; flex-direction: column; gap: 16px; }
-  .email-form-container input {
-    padding: 14px 16px;
-    border-radius: 12px;
-    border: none;
-    font-size: 16px;
-    background: rgba(255,255,255,0.1);
+
+  .btn-email {
+    background: rgba(255, 255, 255, 0.08);
     color: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .btn-login {
+    background: transparent;
+    color: #aaa;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    margin-top: 10px;
+  }
+
+  .btn:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 10px 20px rgba(0, 210, 255, 0.2);
+  }
+
+  .btn-icon { width: 22px; height: 22px; }
+
+  /* FORM STYLES */
+  #emailFormContainer { display: none; flex-direction: column; gap: 15px; }
+
+  .input-group {
+    position: relative;
+    width: 100%;
+  }
+
+  .input-group i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+    transition: 0.3s;
+  }
+
+  input {
+    width: 100%;
+    padding: 15px 15px 15px 45px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    color: white;
+    font-size: 15px;
     outline: none;
-    transition: background 0.2s;
+    transition: 0.3s;
   }
-  .email-form-container input::placeholder { color: #ffffffaa; }
-  .email-form-container input:focus { background: rgba(255,255,255,0.2); }
+
+  input:focus {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
+  }
+
+  input:focus + i { color: var(--accent-blue); }
+
   .btn-submit {
-    padding: 16px;
-    border-radius: 12px;
-    border: none;
-    font-size: 18px;
-    font-weight: 500;
-    background-color: #f5a623;
-    color: #0a3d62;
-    cursor: pointer;
-    transition: background 0.2s;
+    background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+    color: white;
+    margin-top: 10px;
+    box-shadow: 0 10px 20px rgba(0, 210, 255, 0.3);
   }
-  .btn-submit:hover { background-color: #ffbe3c; }
-  .forgot-password { margin-top: 12px; font-size: 14px; color: #ffffff99; cursor: pointer; text-decoration: underline; transition: color 0.2s; }
-  .forgot-password:hover { color: #f5a623; }
-  .back-btn { position: absolute; top: 16px; left: 16px; background: transparent; border: none; color: #f5a623; font-size: 16px; cursor: pointer; font-weight: 500; transition: color 0.2s; }
-  .back-btn:hover { color: #ffffff; }
+
+  .back-link {
+    text-align: center;
+    font-size: 14px;
+    color: #666;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+
+  .back-link:hover { color: #fff; }
+
+  /* ANIMATIONS */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* STATUS OVERLAY */
+  #statusOverlay {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 25px;
+    border-radius: 12px;
+    background: #fff;
+    color: #000;
+    font-weight: 700;
+    display: none;
+    z-index: 1000;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    animation: slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  @keyframes slideInRight {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+  }
+
 </style>
 </head>
 <body>
 
-<div class="logo-container">
-  <div class="logo">Lenovox-ai<span class="circle"></span></div>
-  <div class="typing-text" id="typingText"></div>
-</div>
+  <div class="universe-bg"></div>
+  <div class="nebula"></div>
+  <canvas id="star-canvas"></canvas>
 
-<div class="buttons" id="landingButtons">
-  <a href="#" id="googleBtn" class="btn">
-    <img src="https://i.postimg.cc/NfzPJPrf/sq-google-g-logo-update-dezeen-2364-col-0.jpg" alt="Google" class="btn-icon" />
-    Continue with Google
-  </a>
-  <a href="#" id="emailBtn" class="btn">
-    <img src="https://i.postimg.cc/9QS59QBD/gmail-mail-icon-for-web-design-free-png.png" alt="Email" class="btn-icon" />
-    Sign up with email
-  </a>
-  <a href="#" class="btn login-btn">Log in</a>
-</div>
+  <div id="statusOverlay"></div>
 
-<div class="email-form-container" id="emailFormContainer">
-  <button class="back-btn" id="backBtn">&#8592; Back</button>
-  <div class="logo">Lenovox-ai<span class="circle"></span></div>
-  <h2>Create your account</h2>
-  <form id="signupForm">
-    <input type="text" placeholder="Full Name" required />
-    <input type="email" placeholder="Email Address" required />
-    <input type="password" placeholder="Password" required />
-    <input type="password" placeholder="Confirm Password" required />
-    <button type="submit" class="btn-submit">Sign Up</button>
-  </form>
-  <div class="forgot-password" id="forgotPassword">Forgotten password?</div>
-</div>
+  <div class="logo-container">
+    <div class="logo">Lenovox-ai<span class="circle"></span></div>
+    <div class="typing-text" id="typingText"></div>
+  </div>
 
-<div class="safe-area-bottom">
-  <div class="indicator"></div>
-</div>
+  <div class="auth-card">
+    <!-- INITIAL BUTTONS -->
+    <div id="landingButtons" style="display: flex; flex-direction: column; gap: 15px;">
+      <h2>Join the Adventure</h2>
+      <button id="googleBtn" class="btn btn-google">
+        <img src="https://i.postimg.cc/NfzPJPrf/sq-google-g-logo-update-dezeen-2364-col-0.jpg" alt="Google" class="btn-icon" />
+        Continue with Google
+      </button>
+      <button id="emailBtn" class="btn btn-email">
+        <i class="fas fa-envelope"></i>
+        Sign up with Email
+      </button>
+      <button id="loginBtn" class="btn btn-login">Already have an account? Log In</button>
+    </div>
 
-<script src="auth.js"></script>
-<script>
-  // TYPING EFFECT
-  const words = [
-    "Welcome to Lenovox-ai!", "Your Smart Study Buddy is Here", "Learn Faster • Play Smarter",
-    "Quizzes, Games & Rewards Await!", "Ask Anything – Get Instant Help", "Turn Studying into an Adventure",
-    "Earn Points • Unlock Fun Stuff", "Offline & Online • Always With You", "Daily Challenges • Quiz Mastery",
-    "Level Up Your Brain – Let's Go!", "Your Personal AI Tutor", "Study Smart, Not Hard",
-    "Ready to Crush Your Goals?", "Welcome, Future Legend 🌟"
-  ];
-  const typingEl = document.getElementById("typingText");
-  let wordIndex = 0, charIndex = 0, deleting = false;
-  function typeEffect() {
-    const currentWord = words[wordIndex];
-    if(!deleting){
-      typingEl.textContent = currentWord.slice(0, charIndex++);
-      if(charIndex > currentWord.length) setTimeout(()=>deleting=true,1200);
-    } else {
-      typingEl.textContent = currentWord.slice(0, charIndex--);
-      if(charIndex===0){ deleting=false; wordIndex=(wordIndex+1)%words.length; }
-    }
-    setTimeout(typeEffect,deleting?45:75);
-  }
-  typeEffect();
+    <!-- EMAIL SIGNUP FORM -->
+    <div id="emailFormContainer">
+      <h2>Create Your Profile</h2>
+      <form id="signupForm">
+        <div class="input-group">
+          <input type="text" id="fullName" placeholder="Full Name" required />
+          <i class="fas fa-user"></i>
+        </div>
+        <div class="input-group">
+          <input type="email" id="email" placeholder="Email Address" required />
+          <i class="fas fa-at"></i>
+        </div>
+        <div class="input-group">
+          <input type="password" id="password" placeholder="Password" required />
+          <i class="fas fa-lock"></i>
+        </div>
+        <div class="input-group">
+          <input type="password" id="confirmPassword" placeholder="Confirm Password" required />
+          <i class="fas fa-shield-alt"></i>
+        </div>
+        <button type="submit" class="btn btn-submit" id="submitBtn">Create Account</button>
+      </form>
+      <div class="back-link" id="backBtn">← Go Back</div>
+    </div>
+  </div>
 
-  // BUTTONS
-  const emailBtn = document.getElementById("emailBtn");
-  const landingButtons = document.getElementById("landingButtons");
-  const emailFormContainer = document.getElementById("emailFormContainer");
-  const backBtn = document.getElementById("backBtn");
-  const landingLoginBtn = document.querySelector(".login-btn");
+  <!-- IMPORT MODULAR AUTH -->
+  <script type="module">
+    // IMPORT FROM YOUR auth.js
+    import { signUpUser, googleLoginUser } from './auth.js';
 
-  emailBtn.addEventListener("click", () => {
-    typingEl.style.display = "none"; // hide typing effect
-    landingButtons.style.display = "none";
-    emailFormContainer.style.display = "flex";
-    window.scrollTo({ top:0, behavior:"smooth"});
-  });
+    // UI ELEMENTS
+    const typingEl = document.getElementById("typingText");
+    const landingButtons = document.getElementById("landingButtons");
+    const emailFormContainer = document.getElementById("emailFormContainer");
+    const statusOverlay = document.getElementById("statusOverlay");
+    const signupForm = document.getElementById("signupForm");
+    const submitBtn = document.getElementById("submitBtn");
 
-  backBtn.addEventListener("click", () => {
-    emailFormContainer.style.display = "none";
-    landingButtons.style.display = "flex";
-    typingEl.style.display = "block"; // show typing effect again
-    window.scrollTo({ top:0, behavior:"smooth"});
-  });
-
-  landingLoginBtn.addEventListener("click", () => {
-    window.location.href = "login.html"; // redirect to login page
-  });
-
-  // SIGNUP FORM
-  const form = document.getElementById("signupForm");
-  form.addEventListener("submit", async (e)=>{
-    e.preventDefault();
-    const fullName = form.querySelector('input[type="text"]').value;
-    const email = form.querySelector('input[type="email"]').value;
-    const password = form.querySelectorAll('input[type="password"]')[0].value;
-    const confirmPassword = form.querySelectorAll('input[type="password"]')[1].value;
-
-    if(password !== confirmPassword){
-      alert("Passwords do not match!");
-      return;
-    }
-    try{
-      const result = await signUpUser({ fullName, email, password });
-      if(result.success){
-        alert(`Account created successfully 🎉\nWelcome, ${fullName}`);
+    // TYPING EFFECT
+    const words = [
+      "Welcome to Lenovox-ai!", "Your Smart Study Buddy", "Learn Faster • Play Smarter",
+      "Ready to Crush Your Goals?", "Welcome, Future Legend 🌟"
+    ];
+    let wordIndex = 0, charIndex = 0, deleting = false;
+    function typeEffect() {
+      const currentWord = words[wordIndex];
+      if(!deleting){
+        typingEl.textContent = currentWord.slice(0, charIndex++);
+        if(charIndex > currentWord.length) setTimeout(()=>deleting=true,1500);
       } else {
-        alert(result.error || "Something went wrong.");
+        typingEl.textContent = currentWord.slice(0, charIndex--);
+        if(charIndex===0){ deleting=false; wordIndex=(wordIndex+1)%words.length; }
       }
-    } catch(err){
-      alert("Error: "+err.message);
+      setTimeout(typeEffect, deleting?40:70);
     }
-  });
+    typeEffect();
 
-  // GOOGLE LOGIN
-  document.getElementById("googleBtn").addEventListener("click", async ()=>{
-    try{
-      const result = await googleLoginUser(); // auth.js handles UID & name creation
-      if(result.success){
-        alert(`Welcome ${result.name}`);
-      } else {
-        alert(result.error || "Google login failed");
+    // NAVIGATION
+    document.getElementById("emailBtn").onclick = () => {
+      landingButtons.style.display = "none";
+      emailFormContainer.style.display = "flex";
+    };
+    document.getElementById("backBtn").onclick = () => {
+      emailFormContainer.style.display = "none";
+      landingButtons.style.display = "flex";
+    };
+    document.getElementById("loginBtn").onclick = () => {
+      window.location.href = "login.html";
+    };
+
+    // STATUS NOTIFIER
+    function notify(msg, isError = false) {
+      statusOverlay.textContent = msg;
+      statusOverlay.style.background = isError ? "#ff4757" : "#2ed573";
+      statusOverlay.style.color = "#fff";
+      statusOverlay.style.display = "block";
+      setTimeout(() => { statusOverlay.style.display = "none"; }, 4000);
+    }
+
+    // SIGNUP LOGIC
+    signupForm.onsubmit = async (e) => {
+      e.preventDefault();
+      
+      const fullName = document.getElementById("fullName").value;
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const confirmPassword = document.getElementById("confirmPassword").value;
+
+      if(password !== confirmPassword) {
+        notify("Passwords do not match!", true);
+        return;
       }
-    } catch(err){
-      alert(err.message);
-    }
-  });
 
-  document.getElementById("forgotPassword").addEventListener("click", ()=>{
-    alert("Reset password flow will be handled in auth.js");
-  });
-</script>
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Launching...";
+
+      try {
+        // CALLING THE IMPORTED FUNCTION FROM auth.js
+        const result = await signUpUser({ fullName, email, password });
+        
+        if(result.success) {
+          notify(`Welcome to the Universe, ${fullName}! 🚀`);
+          setTimeout(() => { window.location.href = "index.html"; }, 1500);
+        } else {
+          notify(result.error || "Signup failed", true);
+        }
+      } catch (err) {
+        notify("Error: " + err.message, true);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Create Account";
+      }
+    };
+
+    // GOOGLE LOGIN LOGIC
+    document.getElementById("googleBtn").onclick = async () => {
+      try {
+        const result = await googleLoginUser();
+        if(result.success) {
+          notify(`Welcome back, ${result.name}! 🌟`);
+          setTimeout(() => { window.location.href = "index.html"; }, 1500);
+        } else {
+          notify(result.error || "Google login failed", true);
+        }
+      } catch (err) {
+        notify(err.message, true);
+      }
+    };
+
+    // STARFIELD BACKGROUND SCRIPT
+    const canvas = document.getElementById('star-canvas');
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+    function initStars() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      stars = [];
+      for (let i = 0; i < 100; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          size: Math.random() * 2,
+          opacity: Math.random(),
+          speed: Math.random() * 0.05
+        });
+      }
+    }
+    function drawStars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      stars.forEach(s => {
+        ctx.fillStyle = `rgba(255, 255, 255, ${s.opacity})`;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+        ctx.fill();
+        s.y -= s.speed;
+        if (s.y < 0) s.y = canvas.height;
+      });
+      requestAnimationFrame(drawStars);
+    }
+    window.onresize = initStars;
+    initStars();
+    drawStars();
+
+  </script>
 </body>
-  </html>
+</html>
