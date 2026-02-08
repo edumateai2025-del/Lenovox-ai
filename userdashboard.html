@@ -24,6 +24,7 @@
     background-color: #F8FAFC; 
     color: #334155;
     overflow-x: hidden;
+    padding-bottom: 100px;
   }
 
   .dashboard-container {
@@ -144,7 +145,7 @@
   .card-title { font-size: 1rem; font-weight: 700; color: #1E293B; margin-bottom: 4px; }
   .card-desc { font-size: 0.75rem; color: #64748B; line-height: 1.4; padding: 0 2px; }
 
-  /* ===== 3D NEWS SECTION ===== */
+  /* ===== 3D NEWS SECTION (20 ITEMS) ===== */
   .news-section { margin-top: 35px; }
   .news-section h2 { font-size: 1.3rem; margin-bottom: 20px; font-weight: 700; color: #1E293B; }
   .news-item {
@@ -243,11 +244,11 @@
     </div>
   </div>
 
-  <!-- NEWS SECTION -->
+  <!-- NEWS SECTION (20 EDUCATIONAL ITEMS) -->
   <div class="news-section">
     <h2>What's New</h2>
     <ul id="newsList" style="list-style: none; padding: 0;">
-      <p>Loading updates...</p>
+      <p>Loading educational updates...</p>
     </ul>
   </div>
 
@@ -265,7 +266,19 @@
 
   let currentUserId = null;
   let userBalance = 0;
-  let isHidden = false;
+  let isHidden = false; // Default: balance is VISIBLE (unhidden) - eye icon shows without slash
+
+  // Listen for reward updates from other files (quiz.html, games.html, etc.)
+  window.addEventListener('coinbaseUpdate', (e) => {
+    if (e.detail.userId === currentUserId) {
+      userBalance = e.detail.balance;
+      updateBalanceUI();
+      // Optional: Show a notification when a reward is received
+      if (e.detail.reward) {
+        console.log(`🎉 ${e.detail.reward}: +${e.detail.amount} LNX`);
+      }
+    }
+  });
 
   // Initialize Dashboard with Real Auth
   async function init() {
@@ -273,16 +286,17 @@
     watchAuth(async (user) => {
       if (user) {
         currentUserId = user.uid;
-        const name = user.displayName || "Michael Chibuzor";
+        const name = user.displayName || "Student";
         document.getElementById('userName').textContent = name;
         document.getElementById('userInitial').innerHTML = name.charAt(0).toUpperCase();
         
         // Sync with Coinbase System
-        await addOrUpdateAccount({ id: user.uid, name: name });
+        await addOrUpdateAccount({ id: user.uid, name: name, balance: 500 });
         userBalance = await importBalance(user.uid);
         updateBalanceUI();
-        loadNews();
+        loadEducationalNews();
       } else {
+        // Fallback to session or redirect to login
         const session = getCurrentUser();
         if (session) {
           currentUserId = session.uid;
@@ -290,12 +304,12 @@
           document.getElementById('userInitial').innerHTML = session.name.charAt(0).toUpperCase();
           userBalance = await importBalance(session.uid);
           updateBalanceUI();
-          loadNews();
+          loadEducationalNews();
         }
       }
     });
 
-    // Global Coinbase Listener for real-time updates (e.g., from games)
+    // Global Coinbase Listener for real-time updates
     window.addEventListener('coinbaseUpdate', (e) => {
       if (e.detail.userId === currentUserId) {
         userBalance = e.detail.balance;
@@ -309,20 +323,26 @@
     el.textContent = isHidden ? "••••••" : `${userBalance.toLocaleString()} LNX`;
   }
 
-  // Toggle Balance
+  // Toggle Balance Visibility
+  // Default: eye icon (no slash) = balance is VISIBLE
+  // Click: eye-slash icon = balance is HIDDEN
   document.getElementById('toggleBalance').addEventListener('click', (e) => {
     isHidden = !isHidden;
-    e.target.classList.toggle('fa-eye-slash');
-    e.target.classList.toggle('fa-eye');
+    if (isHidden) {
+      // Balance is now hidden - show eye-slash icon
+      e.target.classList.remove('fa-eye');
+      e.target.classList.add('fa-eye-slash');
+    } else {
+      // Balance is now visible - show eye icon (no slash)
+      e.target.classList.remove('fa-eye-slash');
+      e.target.classList.add('fa-eye');
+    }
     updateBalanceUI();
   });
 
-  // View History
+  // View Transaction History
   document.getElementById('viewHistory').addEventListener('click', async () => {
-    if (currentUserId) {
-        const txs = await importTransactions(currentUserId);
-        alert(`You have ${txs.length} recent transactions.`);
-    }
+    window.open('history.html', '_blank');
   });
 
   // 3D Loader
@@ -334,24 +354,53 @@
     setTimeout(() => { window.location.href = url; }, 2500);
   };
 
-  // News Loading
-  async function loadNews() {
+  // Load 20 Educational News Items
+  async function loadEducationalNews() {
     const container = document.getElementById("newsList");
     try {
-      const res = await fetch("/api/getnews");
+      // Attempt to fetch educational news from API
+      const res = await fetch("/api/getnews?category=education&limit=20");
       const articles = await res.json();
-      container.innerHTML = "";
-      articles.slice(0, 3).forEach(item => {
-        const li = document.createElement("li");
-        li.className = "news-item";
-        const thumb = item.urlToImage || "https://via.placeholder.com/85x65?text=News";
-        li.innerHTML = `<img class="news-thumb" src="${thumb}"><div class="news-title">${item.title}</div>`;
-        li.onclick = () => window.open(item.url, "_blank");
-        container.appendChild(li);
-      });
+      renderNews(articles.slice(0, 20));
     } catch (err) {
-      container.innerHTML = "<p>No new updates today!</p>";
+      // Fallback: 20 Professional Educational News Items
+      const educationalNews = [
+        { title: "AI Revolutionizes Personalized Learning: How Machine Learning Adapts to Student Needs", urlToImage: "https://picsum.photos/seed/edu1/85/65" },
+        { title: "The Future of STEM Education: Interactive 3D Learning Environments Transform Classrooms", urlToImage: "https://picsum.photos/seed/edu2/85/65" },
+        { title: "Coding for Kids: Why Programming Skills Are Essential in the Digital Age", urlToImage: "https://picsum.photos/seed/edu3/85/65" },
+        { title: "Virtual Reality in Education: Immersive Experiences Enhance Student Engagement", urlToImage: "https://picsum.photos/seed/edu4/85/65" },
+        { title: "Critical Thinking Skills: Preparing Students for Tomorrow's Challenges", urlToImage: "https://picsum.photos/seed/edu5/85/65" },
+        { title: "Online Learning Trends 2025: Hybrid Education Models Gain Momentum", urlToImage: "https://picsum.photos/seed/edu6/85/65" },
+        { title: "Gamification in Education: How Game-Based Learning Boosts Student Motivation", urlToImage: "https://picsum.photos/seed/edu7/85/65" },
+        { title: "Digital Literacy: Essential Skills for Students in a Connected World", urlToImage: "https://picsum.photos/seed/edu8/85/65" },
+        { title: "The Power of Collaborative Learning: Building Teamwork in Virtual Classrooms", urlToImage: "https://picsum.photos/seed/edu9/85/65" },
+        { title: "Mental Health in Education: Supporting Student Wellbeing Through Technology", urlToImage: "https://picsum.photos/seed/edu10/85/65" },
+        { title: "Adaptive Learning Systems: How AI Personalizes Education for Every Student", urlToImage: "https://picsum.photos/seed/edu11/85/65" },
+        { title: "Global Classrooms: Breaking Borders Through International Online Learning", urlToImage: "https://picsum.photos/seed/edu12/85/65" },
+        { title: "Cybersecurity Awareness: Teaching Students to Protect Their Digital Identity", urlToImage: "https://picsum.photos/seed/edu13/85/65" },
+        { title: "Data Science for Students: Unlocking Insights Through Analytics and Big Data", urlToImage: "https://picsum.photos/seed/edu14/85/65" },
+        { title: "Blockchain in Education: Securing Credentials and Transforming Verification", urlToImage: "https://picsum.photos/seed/edu15/85/65" },
+        { title: "Environmental Education: Preparing the Next Generation of Eco-Warriors", urlToImage: "https://picsum.photos/seed/edu16/85/65" },
+        { title: "Microlearning: How Bite-Sized Education Fits Modern Student Lifestyles", urlToImage: "https://picsum.photos/seed/edu17/85/65" },
+        { title: "Emotional Intelligence in Schools: Building Empathy and Social Skills", urlToImage: "https://picsum.photos/seed/edu18/85/65" },
+        { title: "Quantum Computing Basics: Introducing Students to Next-Gen Technology", urlToImage: "https://picsum.photos/seed/edu19/85/65" },
+        { title: "Inclusive Education: Technology Solutions for Students with Diverse Learning Needs", urlToImage: "https://picsum.photos/seed/edu20/85/65" }
+      ];
+      renderNews(educationalNews);
     }
+  }
+
+  function renderNews(articles) {
+    const container = document.getElementById("newsList");
+    container.innerHTML = "";
+    articles.slice(0, 20).forEach(item => {
+      const li = document.createElement("li");
+      li.className = "news-item";
+      const thumb = item.urlToImage || "https://via.placeholder.com/85x65?text=News";
+      li.innerHTML = `<img class="news-thumb" src="${thumb}"><div class="news-title">${item.title}</div>`;
+      li.onclick = () => { if(item.url) window.open(item.url, "_blank"); };
+      container.appendChild(li);
+    });
   }
 
   init();
