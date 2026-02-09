@@ -82,20 +82,20 @@
   .brand-text .small { font-size: 0.8rem; color: var(--text-sub); }
 
   .controls { display: flex; gap: 15px; align-items: center; }
-  .muteToggle { 
-    display: flex; 
-    align-items: center; 
-    gap: 8px; 
-    background: #F1F5F9; 
-    border: none; 
-    padding: 10px 15px; 
-    border-radius: 14px; 
-    cursor: pointer; 
+  .back-btn {
+    background: #F1F5F9;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 12px;
+    cursor: pointer;
     font-weight: 600;
+    color: var(--text-main);
     transition: 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
-  .muteToggle:hover { background: #E2E8F0; }
-  .muteToggle input { display: none; }
+  .back-btn:hover { background: #E2E8F0; transform: translateX(-5px); }
 
   main { padding: 30px; }
 
@@ -247,7 +247,6 @@
 
   @media (max-width: 600px) {
     .container { border-radius: 0; }
-    .grid { grid-template-columns: 1fr; }
     .meta { flex-direction: column; gap: 10px; }
   }
 </style>
@@ -257,6 +256,9 @@
     <div class="container">
       <header>
         <div class="brand">
+          <button class="back-btn" onclick="window.location.href='userdashboard.html'">
+            <i class="fas fa-arrow-left"></i> Back
+          </button>
           <div class="logo">LX</div>
           <div class="brand-text">
             <div class="title">Lenovox AI</div>
@@ -276,7 +278,7 @@
         <section class="landing" id="landing">
           <h1>Master Your Knowledge</h1>
           <div class="liveText" id="liveText">Ready to learn?</div>
-          <p class="sub">Challenge yourself with 20 questions. Earn <b>1 LNX coin</b> for every correct answer!</p>
+          <p class="sub">Challenge yourself with 20 questions from our massive 2,000+ question bank. Earn <b>1 LNX coin</b> for every correct answer!</p>
           <button class="btn btn-start" id="startBtn">Start Quiz & Earn Coins</button>
         </section>
 
@@ -314,7 +316,7 @@
             <h2 id="feedbackTitle">Great Job!</h2>
             <p id="feedbackText" style="color:var(--text-sub); margin-bottom:25px;">You're becoming a master!</p>
             <button class="btn btn-start" id="retryBtn">Try Again</button>
-            <button class="btn" onclick="window.location.href='index.html'" style="background:#E2E8F0; color:var(--text-main); margin-left:10px;">Back to Dashboard</button>
+            <button class="btn" onclick="window.location.href='userdashboard.html'" style="background:#E2E8F0; color:var(--text-main); margin-left:10px;">Back to Dashboard</button>
           </div>
         </section>
       </main>
@@ -332,6 +334,7 @@
 <script type="module">
   import { watchAuth } from './auth.js';
   import { addReward } from './coinbase.js';
+  import { questions } from './questions.js';
 
   const QUESTIONS_PER_QUIZ = 20;
   const TIME_PER_QUESTION = 25;
@@ -364,7 +367,7 @@
   });
 
   // Typing Effect
-  const messages = ["Learn faster with Lenovox AI", "Earn 1 LNX for every correct answer", "20 questions to master the topic", "Let's start your journey!"];
+  const messages = ["Learn faster with Lenovox AI", "Earn 1 LNX for every correct answer", "2,000+ questions to master", "Let's start your journey!"];
   let mi=0, ci=0, deleting=false;
   function typeLoop() {
     const msg = messages[mi];
@@ -385,27 +388,16 @@
     muteLabel.innerHTML = muteToggle.checked ? '<i class="fas fa-volume-mute"></i> Voice OFF' : '<i class="fas fa-volume-up"></i> Voice ON';
   });
 
-  // Fetch Questions
-  async function fetchQuestions() {
-    try {
-      const res = await fetch('/api/getQuestions');
-      const data = await res.json();
-      return data.sort(() => 0.5 - Math.random()).slice(0, QUESTIONS_PER_QUIZ);
-    } catch (e) {
-      // Mock questions for demo
-      return Array.from({length: 20}, (_, i) => ({
-        question: `Sample Question ${i+1}: What is 2 + ${i}?`,
-        options: [`${2+i}`, `${3+i}`, `${4+i}`, `${5+i}`],
-        answer: `${2+i}`
-      }));
-    }
+  // Get Random Questions from Local Database
+  function getQuizQuestions() {
+    return questions.sort(() => 0.5 - Math.random()).slice(0, QUESTIONS_PER_QUIZ);
   }
 
   // Start Quiz
   startBtn.onclick = async () => {
     landing.style.display = 'none';
     document.getElementById('loaderOverlay').style.display = 'flex';
-    quizQuestions = await fetchQuestions();
+    quizQuestions = getQuizQuestions();
     document.getElementById('loaderOverlay').style.display = 'none';
     quizWrap.style.display = 'block';
     showQuestion();
@@ -415,7 +407,7 @@
     if (currentIndex >= QUESTIONS_PER_QUIZ) return showResults();
     
     const q = quizQuestions[currentIndex];
-    questionText.textContent = q.question;
+    questionText.textContent = q.q;
     progressText.textContent = `Question ${currentIndex + 1} / ${QUESTIONS_PER_QUIZ}`;
     
     optionsEl.innerHTML = '';
@@ -433,7 +425,7 @@
       optionsEl.appendChild(btn);
     });
 
-    if (!muteToggle.checked) speak(q.question);
+    if (!muteToggle.checked) speak(q.q);
     startTimer();
   }
 
@@ -503,5 +495,5 @@
     }
   }
 </script>
-          </body>
+</body>
 </html>
