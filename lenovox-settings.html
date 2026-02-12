@@ -1,473 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Settings • Lenovox AI</title>
-  <!-- Font Awesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings • Lenovox AI</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:100%; height:100%; font-family: 'Inter', sans-serif; }
+  body { background:#f5f7fa; color:#1a1a1a; transition:0.3s; }
+  .container { max-width:580px; margin:40px auto; background:white; padding:35px; border-radius:16px; box-shadow:0 2px 12px rgba(0,0,0,0.08); border:1px solid #e5e7eb; }
+  h2 { text-align:center; font-size:28px; margin-bottom:30px; display:flex; gap:12px; justify-content:center; align-items:center; }
+  h2 i { color:#3b82f6; font-size:32px; }
 
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+  .tabs { display:flex; gap:8px; margin-bottom:30px; background:#f0f1f3; padding:6px; border-radius:10px; }
+  .tab { flex:1; padding:10px 16px; cursor:pointer; border:none; border-radius:8px; font-weight:500; font-size:14px; color:#666; display:flex; justify-content:center; align-items:center; gap:6px; user-select:none; transition:0.2s; background:transparent; }
+  .tab.active { background:#3b82f6; color:#fff; box-shadow:0 4px 12px rgba(59,130,246,0.3); }
 
-    html, body {
-      width: 100%;
-      height: 100%;
-    }
+  .tab-content { display:none; opacity:0; pointer-events:none; }
+  .tab-content.active { display:block; opacity:1; pointer-events:auto; animation:fadeIn 0.15s ease-in; }
+  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
 
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #f5f7fa;
-      color: #1a1a1a;
-      transition: background 0.3s, color 0.3s;
-      will-change: background;
-    }
-
-    /* Dark Mode */
-    body.dark {
-      background: #0f1419;
-      color: #e0e0e0;
-    }
-
-    body.dark .container {
-      background: #1a1f2e;
-      border-color: #2a3142;
-    }
-
-    body.dark input,
-    body.dark select,
-    body.dark textarea {
-      background: #252d3d;
-      color: #e0e0e0;
-      border-color: #3a4252;
-    }
-
-    body.dark input:focus,
-    body.dark select:focus,
-    body.dark textarea:focus {
-      border-color: #4a5a7a;
-      background: #2a3240;
-    }
-
-    body.dark .tab {
-      background: #252d3d;
-      color: #a0a0a0;
-    }
-
-    body.dark .tab.active {
-      background: #3b82f6;
-      color: #fff;
-    }
-
-    body.dark h2 {
-      color: #fff;
-    }
-
-    body.dark label {
-      color: #b0b0b0;
-    }
-
-    body.dark #supportList {
-      background: #0f1419;
-      border-color: #2a3142;
-    }
-
-    body.dark .support-item {
-      border-bottom-color: #2a3142;
-    }
+  @media(max-width:600px){ .container{margin:20px;padding:24px;} h2{font-size:24px;} .tab{font-size:12px;padding:8px 10px;} .tab i{display:none;} }
+    /* ======== Basic Styles ======== */
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body { width:100%; height:100%; font-family: 'Inter', sans-serif; }
+    body { background:#f5f7fa; color:#1a1a1a; transition:0.3s; }
+    body.dark { background:#0f1419; color:#e0e0e0; }
 
     .container {
-      max-width: 580px;
-      margin: 40px auto;
-      background: white;
-      padding: 35px;
-      border-radius: 16px;
-      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-      border: 1px solid #e5e7eb;
+      max-width:580px;
+      margin:40px auto;
+      background:white;
+      padding:35px;
+      border-radius:16px;
+      box-shadow:0 2px 12px rgba(0,0,0,0.08);
+      border:1px solid #e5e7eb;
     }
+    body.dark .container { background:#1a1f2e; border-color:#2a3142; }
 
-    h2 {
-      text-align: center;
-      color: #1a1a1a;
-      font-size: 28px;
-      font-weight: 700;
-      margin-bottom: 30px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-    }
-
-    h2 i {
-      color: #3b82f6;
-      font-size: 32px;
-    }
+    h2 { text-align:center; font-size:28px; margin-bottom:30px; display:flex; gap:12px; justify-content:center; align-items:center; }
+    h2 i { color:#3b82f6; font-size:32px; }
 
     /* Tabs */
-    .tabs {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 30px;
-      background: #f0f1f3;
-      padding: 6px;
-      border-radius: 10px;
-    }
+    .tabs { display:flex; gap:8px; margin-bottom:30px; background:#f0f1f3; padding:6px; border-radius:10px; }
+    .tab { flex:1; padding:10px 16px; cursor:pointer; border:none; border-radius:8px; font-weight:500; font-size:14px; color:#666; display:flex; justify-content:center; align-items:center; gap:6px; user-select:none; transition:0.2s; background:transparent; }
+    .tab i { font-size:16px; }
+    .tab.active { background:#3b82f6; color:#fff; box-shadow:0 4px 12px rgba(59,130,246,0.3); }
 
-    .tab {
-      flex: 1;
-      padding: 10px 16px;
-      cursor: pointer;
-      border: none;
-      background: transparent;
-      border-radius: 8px;
-      transition: all 0.2s ease;
-      font-weight: 500;
-      font-size: 14px;
-      color: #666;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      user-select: none;
-      -webkit-user-select: none;
-    }
+    /* Tab content */
+    .tab-content { display:none; opacity:0; pointer-events:none; }
+    .tab-content.active { display:block; opacity:1; pointer-events:auto; animation:fadeIn 0.15s ease-in; }
+    @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
 
-    .tab i {
-      font-size: 16px;
+    /* Form elements */
+    input, select, textarea, button {
+      width:100%; padding:12px 14px; margin-top:10px; border-radius:10px; border:1.5px solid #d1d5db; font-size:14px; transition:0.2s; font-family:inherit;
     }
+    input:focus, select:focus, textarea:focus { outline:none; border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,0.1); background:#f8faff; }
+    input, select, textarea { background:#f9fafb; color:#1a1a1a; }
+    input:readonly { background:#f3f4f6; color:#9ca3af; cursor:not-allowed; }
+    button { background:#3b82f6; color:white; border:none; margin-top:18px; cursor:pointer; font-weight:600; display:flex; justify-content:center; align-items:center; gap:8px; }
+    button:hover:not(:disabled) { background:#2563eb; transform:translateY(-1px); box-shadow:0 6px 20px rgba(59,130,246,0.3); }
+    button:disabled { background:#d1d5db; cursor:not-allowed; opacity:0.7; }
 
-    .tab:active {
-      transform: scale(0.98);
-    }
+    /* Logout */
+    .logout { background:#ef4444; margin-top:30px; }
+    .logout:hover:not(:disabled) { background:#dc2626; box-shadow:0 6px 20px rgba(239,68,68,0.3); }
 
-    .tab.active {
-      background: #3b82f6;
-      color: white;
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-    }
+    /* Profile */
+    .profile { text-align:center; margin-bottom:30px; }
+    .profile-wrapper { position:relative; width:140px; height:140px; margin:0 auto 16px; }
+    .profile img { width:100%; height:100%; border-radius:50%; border:3px solid #3b82f6; object-fit:cover; cursor:pointer; transition:0.2s; }
+    .profile img:hover { transform:scale(1.05); }
+    .profile-hint { font-size:13px; color:#888; display:flex; align-items:center; justify-content:center; gap:6px; }
 
-    /* Content */
-    .tab-content {
-      display: none;
-      opacity: 0;
-      pointer-events: none;
-    }
+    /* Labels */
+    label { display:block; margin-top:18px; font-size:13px; color:#555; font-weight:600; text-transform:uppercase; letter-spacing:0.3px; display:flex; align-items:center; gap:6px; }
+    label i { color:#3b82f6; font-size:14px; }
+    body.dark label { color:#b0b0b0; }
 
-    .tab-content.active {
-      display: block;
-      opacity: 1;
-      pointer-events: auto;
-      animation: fadeIn 0.15s ease-in;
-    }
+    /* Lock hints */
+    .lock-hint { font-size:12px; color:#ef4444; margin-top:6px; display:none; font-weight:600; display:flex; align-items:center; gap:4px; }
+    body.dark .lock-hint { color:#f87171; }
 
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
+    /* Support list */
+    #supportList { margin-top:15px; max-height:300px; overflow-y:auto; border:1.5px solid #d1d5db; border-radius:10px; padding:0; background:#f9fafb; }
+    .support-item { border-bottom:1px solid #e5e7eb; padding:14px 16px; }
+    .support-item:last-child { border-bottom:none; }
+    .support-time { font-size:12px; color:#999; display:flex; align-items:center; gap:6px; margin-bottom:6px; font-weight:500; }
 
-    /* Profile Section */
-    .profile {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-
-    .profile-wrapper {
-      position: relative;
-      width: 140px;
-      height: 140px;
-      margin: 0 auto 16px;
-    }
-
-    .profile img {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      border: 3px solid #3b82f6;
-      cursor: pointer;
-      object-fit: cover;
-      transition: all 0.2s ease;
-      box-shadow: 0 8px 24px rgba(59, 130, 246, 0.25);
-      will-change: transform;
-    }
-
-    .profile img:hover {
-      transform: scale(1.05);
-      box-shadow: 0 12px 32px rgba(59, 130, 246, 0.35);
-    }
-
-    .profile-hint {
-      font-size: 13px;
-      color: #888;
-      margin-top: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-
-    .profile-hint i {
-      font-size: 14px;
-      color: #3b82f6;
-    }
-
-    /* Form Elements */
-    input,
-    select,
-    textarea,
-    button {
-      width: 100%;
-      padding: 12px 14px;
-      margin-top: 10px;
-      border-radius: 10px;
-      border: 1.5px solid #d1d5db;
-      font-size: 14px;
-      font-family: inherit;
-      transition: all 0.2s ease;
-    }
-
-    input:focus,
-    select:focus,
-    textarea:focus {
-      outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-      background: #f8faff;
-    }
-
-    input,
-    select,
-    textarea {
-      background: #f9fafb;
-      color: #1a1a1a;
-    }
-
-    input:disabled,
-    input:readonly {
-      background: #f3f4f6;
-      color: #9ca3af;
-      cursor: not-allowed;
-    }
-
-    label {
-      display: block;
-      margin-top: 18px;
-      font-size: 13px;
-      color: #555;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    label i {
-      color: #3b82f6;
-      font-size: 14px;
-    }
-
-    button {
-      background: #3b82f6;
-      color: white;
-      border: none;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 18px;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      will-change: background, transform;
-    }
-
-    button i {
-      font-size: 16px;
-    }
-
-    button:hover:not(:disabled) {
-      background: #2563eb;
-      transform: translateY(-1px);
-      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
-    }
-
-    button:active:not(:disabled) {
-      transform: translateY(0);
-    }
-
-    button:disabled {
-      background: #d1d5db;
-      cursor: not-allowed;
-      opacity: 0.7;
-    }
-
-    .logout {
-      background: #ef4444;
-      margin-top: 30px;
-    }
-
-    .logout:hover:not(:disabled) {
-      background: #dc2626;
-      box-shadow: 0 6px 20px rgba(239, 68, 68, 0.3);
-    }
-
-    /* Support List */
-    #supportList {
-      margin-top: 15px;
-      max-height: 300px;
-      overflow-y: auto;
-      border: 1.5px solid #d1d5db;
-      border-radius: 10px;
-      padding: 0;
-      background: #f9fafb;
-    }
-
-    .support-item {
-      border-bottom: 1px solid #e5e7eb;
-      padding: 14px 16px;
-      transition: background 0.15s ease;
-    }
-
-    .support-item:hover {
-      background: #f0f4ff;
-    }
-
-    .support-item:last-child {
-      border-bottom: none;
-    }
-
-    .support-time {
-      font-size: 12px;
-      color: #999;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 6px;
-      font-weight: 500;
-    }
-
-    .support-time i {
-      font-size: 12px;
-      color: #3b82f6;
-    }
-
-    .support-item div {
-      color: #333;
-      line-height: 1.6;
-      word-break: break-word;
-      font-size: 14px;
-    }
-
-    .lock-hint {
-      font-size: 12px;
-      color: #ef4444;
-      margin-top: 6px;
-      display: none;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .lock-hint i {
-      font-size: 12px;
-    }
-
-    /* Scrollbar */
-    #supportList::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    #supportList::-webkit-scrollbar-track {
-      background: #f0f1f3;
-      border-radius: 10px;
-    }
-
-    #supportList::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 10px;
-    }
-
-    #supportList::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
-    }
+    /* Dark mode adjustments */
+    body.dark input, body.dark select, body.dark textarea { background:#252d3d; color:#e0e0e0; border-color:#3a4252; }
+    body.dark #supportList { background:#0f1419; border-color:#2a3142; }
+    body.dark h2 { color:#fff; }
 
     /* Responsive */
-    @media (max-width: 600px) {
-      .container {
-        margin: 20px;
-        padding: 24px;
-      }
+    @media(max-width:600px){ .container{margin:20px;padding:24px;} h2{font-size:24px;} .tab{font-size:12px;padding:8px 10px;} .tab i{display:none;} }
 
-      h2 {
-        font-size: 24px;
-      }
-
-      .tabs {
-        gap: 4px;
-      }
-
-      .tab {
-        font-size: 12px;
-        padding: 8px 10px;
-      }
-
-      .tab i {
-        display: none;
-      }
-    }
   </style>
 </head>
-
 <body>
-
   <div class="container">
     <h2><i class="fas fa-cog"></i> Settings</h2>
 
-    <!-- TABS -->
     <div class="tabs">
       <button class="tab active" data-tab="personal"><i class="fas fa-user"></i> Personal</button>
       <button class="tab" data-tab="app"><i class="fas fa-sliders-h"></i> App</button>
       <button class="tab" data-tab="support"><i class="fas fa-headset"></i> Support</button>
     </div>
-
-    <!-- PERSONAL TAB -->
-    <div id="content-personal" class="tab-content active">
-      <div class="profile">
-        <div class="profile-wrapper">
-          <img id="avatar" src="https://via.placeholder.com/140" alt="Profile Picture">
-        </div>
-        <input type="file" id="photo" accept="image/*" hidden>
-        <div class="profile-hint">
-          <i class="fas fa-camera"></i>
-          <span>Tap to change profile picture</span>
-        </div>
-      </div>
-
-      <label for="uid"><i class="fas fa-id-card"></i> UID (Read-only)</label>
-      <input id="uid" readonly placeholder="UID">
-
-      <label for="username"><i class="fas fa-at"></i> Username</label>
-      <input id="username" readonly placeholder="Username">
-
-      <label for="name"><i class="fas fa-signature"></i> Full Name</label>
-      <input id="name" placeholder="Enter your full name">
-      <div id="name-lock-hint" class="lock-hint"><i class="fas fa-lock"></i> Name can only be changed once.</div>
-
-      <label for="age"><i class="fas fa-birthday-cake"></i> Age</label>
-      <input id="age" type="number" placeholder="Enter your age">
-      <div id="age-lock-hint" class="lock-hint"><i class="fas fa-lock"></i> Age can only be changed once.</div>
-
-      <button id="savePersonal"><i class="fas fa-save"></i> Save Personal Info</button>
+<div id="content-personal" class="tab-content active">
+  <div class="profile">
+    <div class="profile-wrapper">
+      <img id="avatar" src="https://via.placeholder.com/140" alt="Profile Picture">
     </div>
+    <input type="file" id="photo" accept="image/*" hidden>
+    <div class="profile-hint">
+      <i class="fas fa-camera"></i>
+      <span>Tap to change profile picture</span>
+    </div>
+  </div>
 
-    <!-- APP TAB -->
+  <label for="uid"><i class="fas fa-id-card"></i> UID (Read-only)</label>
+  <input id="uid" readonly placeholder="UID">
+
+  <label for="username"><i class="fas fa-at"></i> Username</label>
+  <input id="username" readonly placeholder="Username">
+
+  <label for="name"><i class="fas fa-signature"></i> Full Name</label>
+  <input id="name" placeholder="Enter your full name">
+  <div id="name-lock-hint" class="lock-hint" style="display:none;"><i class="fas fa-lock"></i> Name can only be changed once.</div>
+
+  <label for="age"><i class="fas fa-birthday-cake"></i> Age</label>
+  <input id="age" type="number" placeholder="Enter your age">
+  <div id="age-lock-hint" class="lock-hint" style="display:none;"><i class="fas fa-lock"></i> Age can only be changed once.</div>
+
+  <button id="savePersonal"><i class="fas fa-save"></i> Save Personal Info</button>
+</div>
+    <!-- App Tab -->
     <div id="content-app" class="tab-content">
       <label for="theme"><i class="fas fa-palette"></i> App Theme</label>
       <select id="theme">
@@ -476,149 +147,80 @@
       </select>
       <button id="saveApp"><i class="fas fa-save"></i> Save App Settings</button>
     </div>
-
-    <!-- SUPPORT TAB -->
+        <!-- Support Tab -->
     <div id="content-support" class="tab-content">
       <label for="supportMessage"><i class="fas fa-envelope"></i> Send Feedback</label>
       <textarea id="supportMessage" rows="5" placeholder="Share your feedback, suggestions, or report issues..."></textarea>
-
       <button id="sendSupport"><i class="fab fa-google"></i> Send via Gmail</button>
 
-      <label style="margin-top: 25px;"><i class="fas fa-history"></i> Your Feedback History</label>
+      <label style="margin-top:25px;"><i class="fas fa-history"></i> Your Feedback History</label>
       <div id="supportList"></div>
     </div>
 
     <button class="logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Log Out</button>
   </div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
 
-  <script type="module">
-    import { watchAuth, logoutUser, updateDisplayName } from './auth.js';
-    import { getSession, saveSession } from './session.js';
+// ========= DOM ELEMENTS (FAKE/SAFE) =========
+const avatar = document.getElementById('avatar');
+const photoInput = document.getElementById('photo');
+const uidInput = document.getElementById('uid');
+const usernameInput = document.getElementById('username');
+const nameInput = document.getElementById('name');
+const ageInput = document.getElementById('age');
 
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import {
-      getFirestore, doc, getDoc, setDoc, addDoc, collection, query, where, orderBy, onSnapshot, serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-    import {
-      getStorage, ref, uploadBytes, getDownloadURL
-    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDnANsKUAZ1giXXdo-fKkFneMuKh0l0FCg",
-      authDomain: "edumateai-6544b.firebaseapp.com",
-      projectId: "edumateai-6544b",
-      storageBucket: "edumateai-6544b.appspot.com",
-      messagingSenderId: "445949748647",
-      appId: "1:445949748647:web:40bee0e792098333fa4282"
-    };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
+      // ========= SAVE PERSONAL INFO =========
+    savePersonalBtn.addEventListener('click', async () => {
+      if (!currentUser) return;
+      savePersonalBtn.disabled = true;
+      savePersonalBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
 
-    let currentUser = null;
-    let unsubscribeSupport = null;
-    let userDataFromDB = null;
+      const updateData = { ...userDataFromDB };
 
-    // ============================================
-    // OPTIMIZED TAB SWITCHING
-    // ============================================
-    const tabButtons = document.querySelectorAll('.tab');
-    const contentDivs = {
-      'personal': document.getElementById('content-personal'),
-      'app': document.getElementById('content-app'),
-      'support': document.getElementById('content-support')
-    };
-
-    tabButtons.forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        const tabName = btn.getAttribute('data-tab');
-        
-        // Remove active class from all tabs and contents
-        tabButtons.forEach(b => b.classList.remove('active'));
-        Object.values(contentDivs).forEach(div => div.classList.remove('active'));
-        
-        // Add active class to clicked tab and corresponding content
-        btn.classList.add('active');
-        contentDivs[tabName].classList.add('active');
-        
-        sessionStorage.setItem('lastTab', tabName);
-
-        // Initialize support listener when support tab is opened
-        if (tabName === 'support') {
-          initSupportListener();
-        } else if (unsubscribeSupport) {
-          unsubscribeSupport();
-          unsubscribeSupport = null;
+      // Check name change
+      if (nameInput.value !== (userDataFromDB?.name || currentUser.displayName || "")) {
+        if ((userDataFromDB?.nameChangedCount || 0) >= 1) {
+          alert("Name can only be changed once.");
+          savePersonalBtn.disabled = false;
+          savePersonalBtn.innerHTML = '<i class="fas fa-save"></i> Save Personal Info';
+          return;
         }
-      });
-    });
-
-    // Restore last tab
-    const lastTab = sessionStorage.getItem('lastTab') || 'personal';
-    const lastTabBtn = document.querySelector(`[data-tab="${lastTab}"]`);
-    if (lastTabBtn) {
-      lastTabBtn.click();
-    }
-
-    // ============================================
-    // DOM ELEMENTS
-    // ============================================
-    const avatar = document.getElementById('avatar');
-    const photoInput = document.getElementById('photo');
-    const uidInput = document.getElementById('uid');
-    const usernameInput = document.getElementById('username');
-    const nameInput = document.getElementById('name');
-    const ageInput = document.getElementById('age');
-    const themeSelect = document.getElementById('theme');
-    const supportMessage = document.getElementById('supportMessage');
-    const supportList = document.getElementById('supportList');
-
-    // ============================================
-    // THEME MANAGEMENT
-    // ============================================
-    function applyTheme(theme) {
-      if (theme === 'dark') {
-        document.body.classList.add('dark');
-      } else {
-        document.body.classList.remove('dark');
+        updateData.name = nameInput.value;
+        updateData.nameChangedCount = (userDataFromDB?.nameChangedCount || 0) + 1;
+        try { await updateDisplayName(nameInput.value); } catch (e) { console.error(e); }
       }
-    }
 
-    async function initFromSession() {
-      try {
-        const sessionData = await getSession();
-        if (sessionData) {
-          nameInput.value = sessionData.name || "";
-          themeSelect.value = sessionData.theme || "light";
-          if (sessionData.photoURL) avatar.src = sessionData.photoURL;
-          applyTheme(sessionData.theme);
+      // Check age change
+      if (ageInput.value !== (userDataFromDB?.age || "")) {
+        if ((userDataFromDB?.ageChangedCount || 0) >= 1) {
+          alert("Age can only be changed once.");
+          savePersonalBtn.disabled = false;
+          savePersonalBtn.innerHTML = '<i class="fas fa-save"></i> Save Personal Info';
+          return;
         }
-      } catch (e) { console.error("Session Init Error:", e); }
-    }
-    initFromSession();
-
-    // ============================================
-    // FIREBASE AUTH & DATA
-    // ============================================
-    watchAuth(async (user) => {
-      if (!user) {
-        window.location.href = "Login.html";
-        return;
+        updateData.age = ageInput.value;
+        updateData.ageChangedCount = (userDataFromDB?.ageChangedCount || 0) + 1;
       }
-      currentUser = user;
-      uidInput.value = user.uid;
-      usernameInput.value = user.displayName || "user_" + user.uid.slice(0, 6);
 
       try {
-        const snap = await getDoc(doc(db, "users", user.uid));
-        if (snap.exists()) {
-          userDataFromDB = snap.data();
-          nameInput.value = userDataFromDB.name || user.displayName || "";
-          ageInput.value = userDataFromDB.age || "";
-          themeSelect.value = userDataFromDB.theme || "light";
-          if (userDataFromDB.photo) avatar.src = userDataFromDB.photo;
+        // Handle photo upload (local data URL)
+        if (photoInput.files[0]) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            updateData.photoURL = e.target.result;
+          };
+          reader.readAsDataURL(photoInput.files[0]);
+        }
+
+        if (Object.keys(updateData).length > 0) {
+          updateData.uid = currentUser.uid;
+          updateData.email = currentUser.email;
+          await saveSession(updateData);
+          
+          userDataFromDB = updateData;
 
           if (userDataFromDB.nameChangedCount >= 1) {
             nameInput.readOnly = true;
@@ -628,152 +230,58 @@
             ageInput.readOnly = true;
             document.getElementById('age-lock-hint').style.display = 'flex';
           }
-          applyTheme(userDataFromDB.theme);
-          await saveSession({
-            uid: user.uid,
-            email: user.email,
-            name: userDataFromDB.name || user.displayName || "",
-            photoURL: userDataFromDB.photo || user.photoURL || "",
-            theme: userDataFromDB.theme
-          });
+          alert("Personal info updated successfully!");
+        } else {
+          alert("No changes to save.");
         }
-      } catch (err) { console.error("Sync Error:", err); }
-    });
-
-    // ============================================
-    // PROFILE PICTURE UPLOAD
-    // ============================================
-    avatar.addEventListener('click', () => photoInput.click());
-    photoInput.addEventListener('change', () => {
-      if (photoInput.files[0]) {
-        const reader = new FileReader();
-        reader.onload = (e) => avatar.src = e.target.result;
-        reader.readAsDataURL(photoInput.files[0]);
-      }
-    });
-
-    // ============================================
-    // SAVE PERSONAL INFO
-    // ============================================
-    document.getElementById("savePersonal").addEventListener('click', async () => {
-      if (!currentUser) return;
-      const btn = document.getElementById("savePersonal");
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-
-      const updateData = {};
-      if (nameInput.value !== (userDataFromDB?.name || currentUser.displayName || "")) {
-        if ((userDataFromDB?.nameChangedCount || 0) >= 1) {
-          alert("Name can only be changed once.");
-          btn.disabled = false;
-          btn.innerHTML = '<i class="fas fa-save"></i> Save Personal Info';
-          return;
-        }
-        updateData.name = nameInput.value;
-        updateData.nameChangedCount = (userDataFromDB?.nameChangedCount || 0) + 1;
-        try { await updateDisplayName(nameInput.value); } catch (e) { console.error(e); }
-      }
-
-      if (ageInput.value !== (userDataFromDB?.age || "")) {
-        if ((userDataFromDB?.ageChangedCount || 0) >= 1) {
-          alert("Age can only be changed once.");
-          btn.disabled = false;
-          btn.innerHTML = '<i class="fas fa-save"></i> Save Personal Info';
-          return;
-        }
-        updateData.age = ageInput.value;
-        updateData.ageChangedCount = (userDataFromDB?.ageChangedCount || 0) + 1;
-
-          // ============================================
-    // SAVE APP SETTINGS
-    // ============================================
-    document.getElementById("saveApp").addEventListener('click', async () => {
-      if (!currentUser) return;
-      const btn = document.getElementById("saveApp");
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-      const newTheme = themeSelect.value;
-      try {
-        await setDoc(doc(db, "users", currentUser.uid), { theme: newTheme }, { merge: true });
-        await saveSession({
-          uid: currentUser.uid,
-          email: currentUser.email,
-          name: nameInput.value,
-          photoURL: avatar.src,
-          theme: newTheme
-        });
-        applyTheme(newTheme);
-        alert("Theme saved successfully!");
       } catch (err) {
-        alert("Error saving theme: " + err.message);
+        console.error("Save Error:", err);
+        alert("Save Error: " + err.message);
       } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-save"></i> Save App Settings';
+        savePersonalBtn.disabled = false;
+        savePersonalBtn.innerHTML = '<i class="fas fa-save"></i> Save Personal Info';
       }
     });
-
-    // ============================================
-    // SUPPORT LISTENER
-    // ============================================
-    function initSupportListener() {
-      if (!currentUser || unsubscribeSupport) return;
-      const q = query(collection(db, "support"), where("uid", "==", currentUser.uid), orderBy("time", "desc"));
-      unsubscribeSupport = onSnapshot(q, (snap) => {
-        supportList.innerHTML = "";
-        snap.forEach(docu => {
-          const data = docu.data();
-          const div = document.createElement("div");
-          div.className = "support-item";
-          const time = data.time ? new Date(data.time.seconds * 1000).toLocaleString() : "Sending...";
-          div.innerHTML = `<span class="support-time"><i class="fas fa-clock"></i> ${time}</span><div>${data.message}</div>`;
-          supportList.appendChild(div);
-        });
-      }, (err) => { console.error("Support Listener Error:", err); });
+    
+       // ========= SUPPORT MESSAGES =========
+    function loadSupportMessages() {
+      const saved = localStorage.getItem('supportMessages');
+      supportMessages = saved ? JSON.parse(saved) : [];
+      displaySupportMessages();
     }
 
-    // ============================================
-    // SEND SUPPORT (GMAIL INTEGRATION)
-    // ============================================
-    document.getElementById("sendSupport").addEventListener('click', async () => {
-      if (!currentUser) return;
-      const msg = supportMessage.value.trim();
-      if (!msg) {
-        alert("Please write a message first.");
+    function displaySupportMessages() {
+      supportList.innerHTML = "";
+      if (supportMessages.length === 0) {
+        supportList.innerHTML = '<div style="padding:20px;text-align:center;color:#999;">No feedback sent yet.</div>';
         return;
       }
+      supportMessages.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "support-item";
+        div.innerHTML = `<span class="support-time"><i class="fas fa-clock"></i> ${item.timestamp}</span><div>${item.message}</div>`;
+        supportList.appendChild(div);
+      });
+    }
 
-      try {
-        // Save to Firebase
-        await addDoc(collection(db, "support"), { uid: currentUser.uid, message: msg, time: serverTimestamp() });
 
-        // Create Gmail compose link
-        const gmailRecipient = 'lenovox.care@gmail.com';
-        const gmailSubject = encodeURIComponent('Lenovox Feedback from ' + (currentUser.displayName || 'Student'));
-        const gmailBody = encodeURIComponent(
-          `Hello Lenovox Team,\n\nI have the following feedback:\n\n${msg}\n\nThank you for reading!\n\nBest regards,\n${currentUser.displayName || 'Student'}\n(${currentUser.email})`
-        );
+  // ==== TAB SWITCHING ====
+  const tabButtons = document.querySelectorAll('.tab');
+  const tabContents = document.querySelectorAll('.tab-content');
 
-        // Open Gmail with pre-filled compose
-        const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=${gmailRecipient}&su=${gmailSubject}&body=${gmailBody}`;
-        window.open(gmailLink, '_blank');
-
-        supportMessage.value = "";
-        alert("Your feedback has been saved and Gmail is opening. Just tap Send to submit!");
-      } catch (err) {
-        alert("Error sending message: " + err.message);
-      }
+  tabButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      tabButtons.forEach(b => b.classList.remove('active'));
+      tabContents.forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('content-' + btn.dataset.tab).classList.add('active');
+      sessionStorage.setItem('lastTab', btn.dataset.tab);
     });
+  });
 
-    // ============================================
-    // LOGOUT
-    // ============================================
-    document.getElementById("logoutBtn").addEventListener('click', async () => {
-      try {
-        await logoutUser();
-        window.location.href = "Login.html";
-      } catch (err) { console.error("Logout error:", err); }
-    });
-  </script>
-
+  const lastTab = sessionStorage.getItem('lastTab') || 'personal';
+  const lastBtn = document.querySelector(`.tab[data-tab="${lastTab}"]`);
+  if(lastBtn) lastBtn.click();
+</script>
 </body>
-</html>
+        </html>
