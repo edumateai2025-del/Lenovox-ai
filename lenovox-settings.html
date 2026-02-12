@@ -5,12 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Settings • Lenovox AI</title>
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
-
 <style>
 body {
   font-family: Arial, sans-serif;
@@ -82,7 +76,6 @@ small {
 }
 </style>
 </head>
-
 <body>
 
 <div class="container">
@@ -97,116 +90,104 @@ small {
   <input type="text" id="username" placeholder="Username" disabled>
   <input type="text" id="name" placeholder="Full Name">
   <input type="number" id="age" placeholder="Age">
-
+  
   <select id="theme">
     <option value="">Select Theme</option>
     <option value="light">Light</option>
     <option value="dark">Dark</option>
   </select>
 
-  <button onclick="saveSettings()">Save Settings</button>
-  <button class="logout" onclick="logout()">Log Out</button>
+  <button id="saveBtn">Save Settings</button>
+  <button id="changePasswordBtn">Change Password</button>
+  <button class="logout" id="logoutBtn">Log Out</button>
 </div>
 
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyDnANsKUAZ1giXXdo-fKkFneMuKh0l0FCg",
-  authDomain: "edumateai-6544b.firebaseapp.com",
-  projectId: "edumateai-6544b",
-  storageBucket: "edumateai-6544b.appspot.com",
-  messagingSenderId: "445949748647",
-  appId: "1:445949748647:web:40bee0e792098333fa4282"
-};
+<script type="module">
+  import { watchAuth, logoutUser, resetPassword, updateDisplayName, getCurrentUser } from './auth.js';
+  
+  const avatar = document.getElementById("avatar");
+  const photoInput = document.getElementById("photo");
+  const nameInput = document.getElementById("name");
+  const ageInput = document.getElementById("age");
+  const themeSelect = document.getElementById("theme");
+  const usernameInput = document.getElementById("username");
+  const saveBtn = document.getElementById("saveBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const changePasswordBtn = document.getElementById("changePasswordBtn");
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-const storage = firebase.storage();
+  avatar.onclick = () => photoInput.click();
 
-const avatar = document.getElementById("avatar");
-const photoInput = document.getElementById("photo");
-const nameInput = document.getElementById("name");
-const ageInput = document.getElementById("age");
-const themeSelect = document.getElementById("theme");
-const usernameInput = document.getElementById("username");
-
-avatar.onclick = () => photoInput.click();
-
-// Apply theme helper
-function applyTheme(theme) {
-  if (theme === "dark") {
-    document.body.classList.add("dark");
-  } else {
-    document.body.classList.remove("dark");
-  }
-}
-
-// Fetch user info if logged in
-auth.onAuthStateChanged(user => {
-  const uid = user ? user.uid : null;
-  const autoUsername = uid ? "user_" + uid.slice(0, 6) : "guest";
-  usernameInput.value = autoUsername;
-
-  if (uid) {
-    db.collection("users").doc(uid).get().then(doc => {
-      if (doc.exists) {
-        const d = doc.data();
-        nameInput.value = d.name || "";
-        ageInput.value = d.age || "";
-        themeSelect.value = d.theme || "";
-        if (d.photo) avatar.src = d.photo;
-        applyTheme(d.theme);
-      }
-    });
-  }
-});
-
-// Preview selected photo
-photoInput.addEventListener("change", e => {
-  const file = e.target.files[0];
-  if (file) avatar.src = URL.createObjectURL(file);
-});
-
-// Save settings
-function saveSettings() {
-  const user = auth.currentUser;
-  if (!user) {
-    alert("Please log in to save your settings.");
-    return;
+  // Apply theme helper
+  function applyTheme(theme) {
+    if (theme === "dark") {
+      document.body.classList.add("dark");
+    } else {
+      document.body.classList.remove("dark");
+    }
   }
 
-  const file = photoInput.files[0];
-  const data = {
-    name: nameInput.value,
-    age: ageInput.value,
-    theme: themeSelect.value,
-    username: usernameInput.value
-  };
-
-  applyTheme(themeSelect.value);
-
-  if (file) {
-    const ref = storage.ref("profiles/" + user.uid + ".jpg");
-    ref.put(file).then(() => {
-      ref.getDownloadURL().then(url => {
-        data.photo = url;
-        db.collection("users").doc(user.uid).set(data, { merge: true });
-        alert("Settings saved");
-      });
-    });
-  } else {
-    db.collection("users").doc(user.uid).set(data, { merge: true });
-    alert("Settings saved");
+  // Load user info from session/localStorage
+  const session = getCurrentUser();
+  if (session) {
+    usernameInput.value = "user_" + session.uid.slice(0,6);
+    nameInput.value = session.name || "";
+    ageInput.value = session.age || "";
+    themeSelect.value = session.theme || "";
+    applyTheme(session.theme);
+    if (session.photoURL) avatar.src = session.photoURL;
   }
-}
 
-// Logout
-function logout() {
-  auth.signOut().then(() => {
-    // Optional: Just show settings as guest instead of redirect
-    alert("You are logged out. Please log in to save changes.");
+  // Preview selected photo
+  photoInput.addEventListener("change", e => {
+    const file = e.target.files[0];
+    if (file) avatar.src = URL.createObjectURL(file);
   });
-}
+
+  // Save settings
+  saveBtn.addEventListener("click", async () => {
+    const user = getCurrentUser();
+    if (!user) {
+      alert("You must be logged in to save settings!");
+      return;
+    }
+
+    // Update display name
+    if (nameInput.value) {
+      await updateDisplayName(nameInput.value);
+    }
+
+    // Save theme/age to session/localStorage
+    const newSession = { ...user, age: ageInput.value, theme: themeSelect.value };
+    localStorage.setItem("userSession", JSON.stringify(newSession));
+
+    applyTheme(themeSelect.value);
+    alert("Settings saved ✅");
+  });
+
+  // Change password
+  changePasswordBtn.addEventListener("click", async () => {
+    const email = session?.email;
+    if (!email) {
+      alert("No logged-in user!");
+      return;
+    }
+    const confirmReset = confirm("Do you want to send a password reset email?");
+    if (confirmReset) {
+      try {
+        await resetPassword(email);
+        alert("Password reset email sent ✅");
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+  });
+
+  // Logout
+  logoutBtn.addEventListener("click", async () => {
+    await logoutUser();
+    alert("Logged out successfully!");
+    window.location.href = "login.html";
+  });
 </script>
 
 </body>
