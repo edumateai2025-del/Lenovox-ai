@@ -1,17 +1,24 @@
 // session.js
+// Persistent user storage using IndexedDB (NOT just login session)
 
 const DB_NAME = "lenovox-auth";
-const STORE = "session";
-const VERSION = 1;
+const STORE = "users";
+const VERSION = 2; // bump version so browser upgrades DB
 
-const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
-
+// ============================
+// Open Database
+// ============================
 function openDB() {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, VERSION);
 
     req.onupgradeneeded = () => {
-      req.result.createObjectStore(STORE, { keyPath: "id" });
+      const db = req.result;
+
+      // Create store if it doesn't exist
+      if (!db.objectStoreNames.contains(STORE)) {
+        db.createObjectStore(STORE, { keyPath: "uid" });
+      }
     };
 
     req.onsuccess = () => resolve(req.result);
@@ -19,38 +26,68 @@ function openDB() {
   });
 }
 
-export async function saveSession(user) {
+// ============================
+// Save / Update User Profile
+// This MERGES data instead of overwriting
+// ============================
+export async function saveSession(uid, newData) {
+  if (!uid) throw new Error("UID is required to save session");
+
   const db = await openDB();
   const tx = db.transaction(STORE, "readwrite");
+  const store = tx.objectStore(STORE);
 
-  const now = Date.now();
+  return new Promise((resolve, reject) => {
+    const getReq = store.get(uid);
 
-  tx.objectStore(STORE).put({
-    id: "current",
-    uid: user.uid,
-    email: user.email,
-    name: user.name || "",
-    photoURL: user.photoURL || "",
-    provider: user.provider || "password",
-    lastLogin: now,
-    expiresAt: now + SEVEN_DAYS
+    getReq.onsuccess = () => {
+      const existingData = getReq.result || {};
+
+      // Merge old + new data
+      const mergedData = {
+        ...existingData,
+        ...newData,
+        uid: uid,
+        lastUpdated: Date.now()
+      };
+
+      const putReq = store.put(mergedData);
+
+      putReq.onsuccess = () => resolve(true);
+      putReq.onerror = () => reject(putReq.error);
+    };
+
+    getReq.onerror = () => reject(getReq.error);
   });
-
-  return tx.complete;
 }
 
-export async function getSession() {
+// ============================
+// Load User Profile
+// ============================
+export async function getSession(uid) {
+  if (!uid) return null;
+
   const db = await openDB();
   const tx = db.transaction(STORE, "readonly");
-  const req = tx.objectStore(STORE).get("current");
+  const store = tx.objectStore(STORE);
 
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
+    const req = store.get(uid);
+
     req.onsuccess = () => resolve(req.result || null);
+    req.onerror = () => resolve(null);
   });
 }
 
-export async function clearSession() {
+// ============================
+// Delete User (Logout cleanup)
+// ============================
+export async function clearSession(uid) {
+  if (!uid) return;
+
   const db = await openDB();
   const tx = db.transaction(STORE, "readwrite");
-  tx.objectStore(STORE).delete("current");
+  const store = tx.objectStore(STORE);
+
+  store.delete(uid);
 }
