@@ -7,22 +7,13 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
+  /* === BASIC STYLES === */
   * { margin:0; padding:0; box-sizing:border-box; }
   html, body { width:100%; height:100%; font-family: 'Inter', sans-serif; }
   body { background:#f5f7fa; color:#1a1a1a; transition:0.3s; }
   body.dark { background:#0f1419; color:#e0e0e0; }
-
-  .container {
-    max-width:580px;
-    margin:40px auto;
-    background:white;
-    padding:35px;
-    border-radius:16px;
-    box-shadow:0 2px 12px rgba(0,0,0,0.08);
-    border:1px solid #e5e7eb;
-  }
+  .container { max-width:580px; margin:40px auto; background:white; padding:35px; border-radius:16px; box-shadow:0 2px 12px rgba(0,0,0,0.08); border:1px solid #e5e7eb; }
   body.dark .container { background:#1a1f2e; border-color:#2a3142; }
-
   h2 { text-align:center; font-size:28px; margin-bottom:30px; display:flex; gap:12px; justify-content:center; align-items:center; }
   h2 i { color:#3b82f6; font-size:32px; }
 
@@ -38,9 +29,7 @@
   @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
 
   /* Form elements */
-  input, select, textarea, button {
-    width:100%; padding:12px 14px; margin-top:10px; border-radius:10px; border:1.5px solid #d1d5db; font-size:14px; transition:0.2s; font-family:inherit;
-  }
+  input, select, textarea, button { width:100%; padding:12px 14px; margin-top:10px; border-radius:10px; border:1.5px solid #d1d5db; font-size:14px; transition:0.2s; font-family:inherit; }
   input:focus, select:focus, textarea:focus { outline:none; border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,0.1); background:#f8faff; }
   input, select, textarea { background:#f9fafb; color:#1a1a1a; }
   input:readonly { background:#f3f4f6; color:#9ca3af; cursor:not-allowed; }
@@ -73,117 +62,233 @@
 </style>
 </head>
 <body>
-  <div class="container">
-    <h2><i class="fas fa-cog"></i> Settings</h2>
+<div class="container">
+  <h2><i class="fas fa-cog"></i> Settings</h2>
 
-    <!-- TABS -->
-    <div class="tabs">
-      <button class="tab active" data-tab="personal"><i class="fas fa-user"></i> Personal</button>
-      <button class="tab" data-tab="app"><i class="fas fa-sliders-h"></i> App</button>
-      <button class="tab" data-tab="support"><i class="fas fa-headset"></i> Support</button>
-    </div>
-
-    <!-- PERSONAL TAB -->
-    <div id="content-personal" class="tab-content active">
-      <div class="profile">
-        <div class="profile-wrapper">
-          <img id="avatar" src="https://via.placeholder.com/140" alt="Profile Picture">
-        </div>
-        <input type="file" id="photo" accept="image/*" hidden>
-        <div class="profile-hint"><i class="fas fa-camera"></i> Tap to change profile picture</div>
-      </div>
-
-      <label for="uid"><i class="fas fa-id-card"></i> UID (Read-only)</label>
-      <input id="uid" readonly placeholder="UID">
-
-      <label for="username"><i class="fas fa-at"></i> Username</label>
-      <input id="username" readonly placeholder="Username">
-
-      <label for="name"><i class="fas fa-signature"></i> Full Name</label>
-      <input id="name" placeholder="Enter your full name">
-      <div id="name-lock-hint" class="lock-hint"><i class="fas fa-lock"></i> Name can only be changed once.</div>
-
-      <label for="age"><i class="fas fa-birthday-cake"></i> Age</label>
-      <input id="age" type="number" placeholder="Enter your age">
-      <div id="age-lock-hint" class="lock-hint"><i class="fas fa-lock"></i> Age can only be changed once.</div>
-
-      <button id="savePersonal"><i class="fas fa-save"></i> Save Personal Info</button>
-    </div>
-
-    <!-- App Tab -->
-    <div id="content-app" class="tab-content">
-      <label for="theme"><i class="fas fa-palette"></i> App Theme</label>
-      <select id="theme">
-        <option value="light">Light Mode</option>
-        <option value="dark">Dark Mode</option>
-      </select>
-      <button id="saveApp"><i class="fas fa-save"></i> Save App Settings</button>
-    </div>
-    <!-- Support Tab -->
-    <div id="content-support" class="tab-content">
-      <label for="supportMessage"><i class="fas fa-envelope"></i> Send Feedback</label>
-      <textarea id="supportMessage" rows="5" placeholder="Share your feedback, suggestions, or report issues..."></textarea>
-      <button id="sendSupport"><i class="fab fa-google"></i> Send via Gmail</button>
-
-      <label style="margin-top:25px;"><i class="fas fa-history"></i> Your Feedback History</label>
-      <div id="supportList"></div>
-    </div>
-
-    <button class="logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Log Out</button>
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" data-tab="personal"><i class="fas fa-user"></i> Personal</button>
+    <button class="tab" data-tab="app"><i class="fas fa-sliders-h"></i> App</button>
+    <button class="tab" data-tab="support"><i class="fas fa-headset"></i> Support</button>
   </div>
 
-  <script
-   type="module">
-import { watchAuth, logoutUser as firebaseLogout, updateDisplayName } from './auth.js';
+  <!-- PERSONAL TAB -->
+  <div id="content-personal" class="tab-content active">
+    <div class="profile">
+      <div class="profile-wrapper">
+        <img id="avatar" src="https://via.placeholder.com/140" alt="Profile Picture">
+      </div>
+      <input type="file" id="photoInput" accept="image/*" hidden>
+      <div class="profile-hint"><i class="fas fa-camera"></i> Tap to change profile picture</div>
+    </div>
+
+    <label for="uid"><i class="fas fa-id-card"></i> UID (Read-only)</label>
+    <input id="uid" readonly placeholder="UID">
+
+    <label for="username"><i class="fas fa-at"></i> Username</label>
+    <input id="username" readonly placeholder="Username">
+
+    <label for="name"><i class="fas fa-signature"></i> Full Name</label>
+    <input id="name" placeholder="Enter your full name">
+    <div id="name-lock-hint" class="lock-hint"><i class="fas fa-lock"></i> Name can only be changed once.</div>
+
+    <label for="age"><i class="fas fa-birthday-cake"></i> Age</label>
+    <input id="age" type="number" placeholder="Enter your age">
+    <div id="age-lock-hint" class="lock-hint"><i class="fas fa-lock"></i> Age can only be changed once.</div>
+
+    <button id="savePersonal"><i class="fas fa-save"></i> Save Personal Info</button>
+  </div>
+
+  <!-- App Tab -->
+  <div id="content-app" class="tab-content">
+    <label for="theme"><i class="fas fa-palette"></i> App Theme</label>
+    <select id="theme">
+      <option value="light">Light Mode</option>
+      <option value="dark">Dark Mode</option>
+    </select>
+    <button id="saveApp"><i class="fas fa-save"></i> Save App Settings</button>
+  </div>
+
+  <!-- Support Tab -->
+  <div id="content-support" class="tab-content">
+    <label for="supportMessage"><i class="fas fa-envelope"></i> Send Feedback</label>
+    <textarea id="supportMessage" rows="5" placeholder="Share your feedback, suggestions, or report issues..."></textarea>
+    <button id="sendSupport"><i class="fab fa-google"></i> Send via Gmail</button>
+
+    <label style="margin-top:25px;"><i class="fas fa-history"></i> Your Feedback History</label>
+    <div id="supportList"></div>
+  </div>
+
+  <button class="logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Log Out</button>
+</div>
+
+<script type="module">
+import { watchAuth, logoutUser, updateDisplayName } from './auth.js';
 import { getSession, saveSession } from './session.js';
-let currentUser = null;    
-let userDataFromDB = null;    
+
+const uidInput = document.getElementById('uid');
+const usernameInput = document.getElementById('username');
+const nameInput = document.getElementById('name');
+const ageInput = document.getElementById('age');
+const avatar = document.getElementById('avatar');
+const photoInput = document.getElementById('photoInput');
+const savePersonalBtn = document.getElementById('savePersonal');
+const themeSelect = document.getElementById('theme');
+const supportMessage = document.getElementById('supportMessage');
+const supportList = document.getElementById('supportList');
+const sendSupportBtn = document.getElementById('sendSupport');
+const logoutBtn = document.getElementById('logoutBtn');
+
+let currentUser = null;
+let userDataFromDB = {};
 let supportMessages = [];
-// Watch the auth state and populate user info
-watchAuth(user => {
-  if (user) {
-    currentUser = user;
 
-    // Get session or DB data
-    userDataFromDB = getSession(user.uid) || {};
+// ====== Load user ======
+watchAuth(async (user) => {
+  if (!user) {
+    window.location.href = "Login.html";
+    return;
+  }
+  currentUser = user;
 
-    // Fill in the form fields
-    document.getElementById('uid').value = userDataFromDB.uid || user.uid;
-    document.getElementById('username').value = userDataFromDB.username || '';
-    document.getElementById('name').value = userDataFromDB.fullName || '';
-    document.getElementById('age').value = userDataFromDB.age || '';
-    document.getElementById('avatar').src = userDataFromDB.avatarUrl || 'https://via.placeholder.com/140';
-  } else {
-    // No user logged in: clear fields
-    document.getElementById('uid').value = '';
-    document.getElementById('username').value = '';
-    document.getElementById('name').value = '';
-    document.getElementById('age').value = '';
-    document.getElementById('avatar').src = 'https://via.placeholder.com/140';
+  // Load session data
+  userDataFromDB = (await getSession(user.uid)) || {};
+
+  // Fill fields
+  uidInput.value = user.uid;
+  usernameInput.value = user.displayName || userDataFromDB.username || "user_" + user.uid.slice(0,6);
+  nameInput.value = userDataFromDB.fullName || user.displayName || "";
+  ageInput.value = userDataFromDB.age || "";
+  avatar.src = userDataFromDB.avatarUrl || "https://via.placeholder.com/140";
+
+  // Lock fields if changed before
+  if ((userDataFromDB.nameChangedCount || 0) >= 1) {
+    nameInput.readOnly = true;
+    document.getElementById('name-lock-hint').style.display = 'flex';
+  }
+  if ((userDataFromDB.ageChangedCount || 0) >= 1) {
+    ageInput.readOnly = true;
+    document.getElementById('age-lock-hint').style.display = 'flex';
+  }
+
+});
+
+// ====== Save personal info ======
+savePersonalBtn.addEventListener('click', async () => {
+  if (!currentUser) return;
+  savePersonalBtn.disabled = true;
+  savePersonalBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+  const updateData = { ...userDataFromDB };
+  updateData.uid = currentUser.uid;
+  updateData.username = usernameInput.value;
+
+  // Name check
+  if (nameInput.value !== (userDataFromDB.fullName || "")) {
+    if ((userDataFromDB.nameChangedCount || 0) >= 1) {
+      alert("Name can only be changed once.");
+      savePersonalBtn.disabled = false;
+      savePersonalBtn.innerHTML = '<i class="fas fa-save"></i> Save Personal Info';
+      return;
+    }
+    updateData.fullName = nameInput.value;
+    updateData.nameChangedCount = (userDataFromDB.nameChangedCount || 0) + 1;
+    try { await updateDisplayName(nameInput.value); } catch(e) { console.error(e); }
+  }
+
+  // Age check
+  if (ageInput.value !== (userDataFromDB.age || "")) {
+    if ((userDataFromDB.ageChangedCount || 0) >= 1) {
+      alert("Age can only be changed once.");
+      savePersonalBtn.disabled = false;
+      savePersonalBtn.innerHTML = '<i class="fas fa-save"></i> Save Personal Info';
+      return;
+    }
+    updateData.age = ageInput.value;
+    updateData.ageChangedCount = (userDataFromDB.ageChangedCount || 0) + 1;
+  }
+
+  // Photo
+  if (photoInput.files[0]) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      updateData.avatarUrl = e.target.result;
+      avatar.src = e.target.result;
+    };
+    reader.readAsDataURL(photoInput.files[0]);
+  }
+
+  try {
+    await saveSession(currentUser.uid, updateData);
+    userDataFromDB = updateData;
+    alert("Personal info updated!");
+  } catch(err) { console.error(err); alert("Error saving: " + err.message); }
+  savePersonalBtn.disabled = false;
+  savePersonalBtn.innerHTML = '<i class="fas fa-save"></i> Save Personal Info';
+});
+
+// ====== Avatar click ======
+avatar.addEventListener('click', () => photoInput.click());
+photoInput.addEventListener('change', () => {
+  if (photoInput.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => avatar.src = e.target.result;
+    reader.readAsDataURL(photoInput.files[0]);
   }
 });
-    // === TAB SWITCHING ===
-    const tabButtons = document.querySelectorAll('.tab');
-    const tabContents = document.querySelectorAll('.tab-content');
 
-    tabButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        tabButtons.forEach(b => b.classList.remove('active'));
-        tabContents.forEach(c => c.classList.remove('active'));
+// ====== Tabs ======
+const tabButtons = document.querySelectorAll('.tab');
+const tabContents = document.querySelectorAll('.tab-content');
 
-        btn.classList.add('active');
-        const target = btn.dataset.tab;
-        document.getElementById('content-' + target).classList.add('active');
+tabButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    tabButtons.forEach(b => b.classList.remove('active'));
+    tabContents.forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('content-' + btn.dataset.tab).classList.add('active');
+    sessionStorage.setItem('lastTab', btn.dataset.tab);
+  });
+});
 
-        // Save last tab
-        sessionStorage.setItem('lastTab', target);
-      });
-    });
+const lastTab = sessionStorage.getItem('lastTab') || 'personal';
+document.querySelector(`.tab[data-tab="${lastTab}"]`)?.click();
 
-    // Restore last active tab
-    const lastTab = sessionStorage.getItem('lastTab') || 'personal';
-    const lastBtn = document.querySelector(`.tab[data-tab="${lastTab}"]`);
-    if (lastBtn) lastBtn.click();
-  </script>
+// ====== Support ======
+function loadSupportMessages() {
+  const saved = localStorage.getItem('supportMessages');
+  supportMessages = saved ? JSON.parse(saved) : [];
+  displaySupportMessages();
+}
+function displaySupportMessages() {
+  supportList.innerHTML = "";
+  if (supportMessages.length === 0) {
+    supportList.innerHTML = '<div style="padding:20px;text-align:center;color:#999;">No feedback sent yet.</div>';
+    return;
+  }
+  supportMessages.forEach(item => {
+    const div = document.createElement('div');
+    div.innerHTML = `<span style="font-size:12px;color:#555;"><i class="fas fa-clock"></i> ${item.timestamp}</span><div>${item.message}</div>`;
+    supportList.appendChild(div);
+  });
+}
+sendSupportBtn.addEventListener('click', () => {
+  const msg = supportMessage.value.trim();
+  if (!msg) return alert("Write a message first.");
+  const item = { id: Date.now(), message: msg, timestamp: new Date().toLocaleString() };
+  supportMessages.unshift(item);
+  localStorage.setItem('supportMessages', JSON.stringify(supportMessages));
+  displaySupportMessages();
+  supportMessage.value = "";
+  alert("Feedback saved!");
+});
+loadSupportMessages();
+
+// ====== Logout ======
+logoutBtn.addEventListener('click', async () => {
+  try { await logoutUser(); window.location.href="Login.html"; }
+  catch(err){ console.error(err); }
+});
+</script>
 </body>
 </html>
