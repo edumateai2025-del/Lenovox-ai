@@ -1,124 +1,186 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lenovox AI - Login</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lenovox-ai – Welcome Back</title>
+
+  <!-- Font Awesome for Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    :root {
+      --space-bg: #03030b;
+      --nebula-purple: rgba(93, 63, 211, 0.4);
+      --nebula-blue: rgba(0, 210, 255, 0.3);
+      --accent-blue: #00d2ff;
+      --accent-purple: #9d50bb;
+      --glass: rgba(255, 255, 255, 0.05);
     }
 
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      perspective: 1000px;
-      overflow-x: hidden;
-    }
-
-    /* ========== LOGIN CONTAINER ========== */
-    .login-container {
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body, html {
       width: 100%;
-      max-width: 420px;
-      padding: 50px 40px;
-      border-radius: 30px;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(20px);
-      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.25);
-      border: 1px solid rgba(255, 255, 255, 0.5);
-      animation: slideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-      transform-style: preserve-3d;
+      min-height: 100vh;
+      font-family: 'Inter', sans-serif;
+      background-color: var(--space-bg);
+      color: white;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
 
-    @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(40px) rotateX(20deg);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0) rotateX(0deg);
-      }
+    /* UNIVERSE BACKGROUND */
+    .universe-bg {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: -2;
+      background: radial-gradient(circle at 50% 50%, #0a0a1a 0%, #03030b 100%);
     }
 
-    /* LOGO & TITLE */
-    .logo-section {
-      text-align: center;
-      margin-bottom: 35px;
+    .nebula {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: 
+        radial-gradient(circle at 20% 30%, var(--nebula-purple) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, var(--nebula-blue) 0%, transparent 50%);
+      z-index: -1;
+      filter: blur(80px);
+      opacity: 0.6;
     }
 
-    .logo-icon {
-      width: 70px;
-      height: 70px;
-      margin: 0 auto 15px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 20px;
+    #star-canvas {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* MASCOT STYLES */
+    .mascot {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 40px;
-      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
-      animation: bounce 2s ease-in-out infinite;
+      font-size: 60px;
+      box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
+      animation: mascotFloat 3s ease-in-out infinite;
+      z-index: 100;
+      cursor: pointer;
+      transition: all 0.3s ease;
     }
 
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
+    .mascot:hover {
+      transform: scale(1.1);
+      box-shadow: 0 15px 50px rgba(102, 126, 234, 0.6);
     }
 
-    h1 {
-      font-size: 32px;
-      font-weight: 700;
-      background: linear-gradient(135deg, #667eea, #764ba2);
+    @keyframes mascotFloat {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-20px); }
+    }
+
+    @keyframes mascotBounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+
+    /* LOGO SECTION */
+    .logo-container {
+      text-align: center;
+      margin-bottom: 40px;
+      animation: fadeInDown 1s ease-out;
+    }
+
+    .logo {
+      font-size: 42px;
+      font-weight: 900;
+      letter-spacing: -1px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-shadow: 0 0 20px rgba(0, 210, 255, 0.5);
+    }
+
+    .circle {
+      width: 16px;
+      height: 16px;
+      background: linear-gradient(135deg, #ffb347, #ffcc33);
+      border-radius: 50%;
+      box-shadow: 0 0 15px #ffcc33;
+      animation: circlePulse 2s ease-in-out infinite;
+    }
+
+    @keyframes circlePulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+
+    .typing-text {
+      font-size: 18px;
+      font-weight: 500;
+      color: #aaa;
+      min-height: 24px;
+      margin-top: 10px;
+    }
+
+    /* FORM & BUTTONS CONTAINER */
+    .auth-card {
+      width: 100%;
+      max-width: 450px;
+      padding: 50px 40px;
+      background: var(--glass);
+      backdrop-filter: blur(20px);
+      border-radius: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+      animation: fadeInUp 0.8s ease-out;
+    }
+
+    .auth-card h2 {
+      text-align: center;
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 10px;
+      background: linear-gradient(90deg, #fff, var(--accent-blue));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 8px;
     }
 
-    .subtitle {
-      color: #888;
+    .subtitle-text {
+      text-align: center;
       font-size: 14px;
-      font-weight: 500;
+      color: #aaa;
+      margin-top: -15px;
     }
 
-    /* ========== FORM ELEMENTS ========== */
-    .form-group {
-      margin-bottom: 18px;
-      animation: fadeInUp 0.6s ease-out backwards;
+    /* INPUT GROUPS */
+    .input-group {
+      position: relative;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
-    .form-group:nth-child(1) { animation-delay: 0.1s; }
-    .form-group:nth-child(2) { animation-delay: 0.2s; }
-    .form-group:nth-child(3) { animation-delay: 0.3s; }
-
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    label {
-      display: block;
+    .input-label {
       font-size: 13px;
       font-weight: 600;
-      color: #333;
-      margin-bottom: 8px;
+      color: #ccc;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
@@ -129,55 +191,64 @@
       align-items: center;
     }
 
-    input {
-      width: 100%;
-      padding: 14px 16px;
-      border: 2px solid #e0e0e0;
-      border-radius: 14px;
-      font-size: 15px;
-      font-family: 'Poppins', sans-serif;
-      transition: all 0.3s ease;
-      background: #f8f9fa;
-      color: #333;
+    .input-group i {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #666;
+      transition: 0.3s;
+      z-index: 2;
     }
 
-    input:focus {
-      outline: none;
-      border-color: #667eea;
-      background: white;
-      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-    }
-
-    input::placeholder {
-      color: #bbb;
-    }
-
-    /* PASSWORD TOGGLE ICON */
     .password-toggle {
       position: absolute;
-      right: 16px;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
       cursor: pointer;
-      color: #667eea;
+      color: #666;
+      transition: 0.3s;
+      z-index: 3;
       font-size: 18px;
-      transition: all 0.2s ease;
-      user-select: none;
     }
 
     .password-toggle:hover {
-      transform: scale(1.15);
-      color: #764ba2;
+      color: var(--accent-blue);
+    }
+
+    input {
+      width: 100%;
+      padding: 15px 50px 15px 45px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      color: white;
+      font-size: 15px;
+      outline: none;
+      transition: 0.3s;
+    }
+
+    input:focus {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 15px rgba(0, 210, 255, 0.3), inset 0 0 10px rgba(0, 210, 255, 0.1);
+    }
+
+    input:focus + i { 
+      color: var(--accent-blue);
     }
 
     /* ERROR MESSAGE */
     .error-message {
       display: none;
-      margin-top: 8px;
-      padding: 10px 14px;
-      background: #ffe0e0;
-      border-left: 4px solid #ff6b6b;
+      margin-top: 6px;
+      padding: 8px 12px;
+      background: rgba(255, 107, 107, 0.15);
+      border-left: 3px solid #ff6b6b;
       border-radius: 8px;
-      font-size: 13px;
-      color: #d32f2f;
+      font-size: 12px;
+      color: #ff9999;
       font-weight: 500;
       animation: slideInError 0.3s ease;
     }
@@ -197,28 +268,26 @@
       display: block;
     }
 
-    /* ========== BUTTONS ========== */
-    .button-group {
-      margin-top: 28px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    button {
+    /* BUTTONS */
+    .btn {
+      width: 100%;
       padding: 16px;
+      border-radius: 16px;
       border: none;
-      border-radius: 14px;
       font-size: 16px;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      text-decoration: none;
       position: relative;
       overflow: hidden;
-      font-family: 'Poppins', sans-serif;
     }
 
-    button::before {
+    .btn::before {
       content: '';
       position: absolute;
       top: 0;
@@ -229,123 +298,94 @@
       transition: left 0.5s ease;
     }
 
-    button:hover::before {
+    .btn:hover::before {
       left: 100%;
     }
 
-    #loginBtn {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+    .btn-login {
+      background: linear-gradient(90deg, #00d2ff, #3a7bd5);
       color: white;
-      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+      box-shadow: 0 10px 20px rgba(0, 210, 255, 0.3);
     }
 
-    #loginBtn:hover:not(:disabled) {
-      transform: translateY(-3px);
-      box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+    .btn-login:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 15px 30px rgba(0, 210, 255, 0.4);
     }
 
-    #loginBtn:active:not(:disabled) {
-      transform: translateY(-1px);
-    }
-
-    #loginBtn:disabled {
+    .btn-login:disabled {
       opacity: 0.7;
       cursor: not-allowed;
     }
 
-    #googleLoginBtn {
+    .btn-google {
       background: white;
-      color: #333;
-      border: 2px solid #e0e0e0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      color: #000;
     }
 
-    #googleLoginBtn:hover:not(:disabled) {
-      background: #f8f9fa;
-      border-color: #667eea;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+    .btn-google:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 10px 20px rgba(255, 255, 255, 0.2);
     }
 
-    #googleLoginBtn img {
-      width: 20px;
-      height: 20px;
-    }
+    .btn-icon { width: 22px; height: 22px; }
 
-    /* FORGOT PASSWORD */
-    .forgot-section {
-      text-align: center;
-      margin-top: 20px;
-    }
-
-    .forgot-link {
-      font-size: 14px;
-      color: #667eea;
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.2s ease;
-      text-decoration: none;
-    }
-
-    .forgot-link:hover {
-      color: #764ba2;
-      text-decoration: underline;
-    }
-
-    /* SIGNUP LINK */
-    .signup-section {
-      text-align: center;
-      margin-top: 25px;
-      padding-top: 25px;
-      border-top: 1px solid #e0e0e0;
-    }
-
-    .signup-section p {
-      font-size: 14px;
-      color: #666;
-    }
-
-    .signup-link {
-      color: #667eea;
-      font-weight: 600;
-      text-decoration: none;
-      transition: all 0.2s ease;
-    }
-
-    .signup-link:hover {
-      color: #764ba2;
-    }
-
-    /* LOADING SPINNER */
     .spinner {
       display: inline-block;
       width: 16px;
       height: 16px;
       border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top: 3px solid white;
       border-radius: 50%;
-      border-top-color: white;
-      animation: spin 0.8s linear infinite;
+      animation: spin 1s linear infinite;
       margin-right: 8px;
     }
 
     @keyframes spin {
-      to { transform: rotate(360deg); }
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* LINKS SECTION */
+    .links-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .forgot-link, .signup-link {
+      font-size: 13px;
+      color: #aaa;
+      cursor: pointer;
+      transition: 0.3s;
+      text-decoration: none;
+    }
+
+    .forgot-link:hover, .signup-link:hover {
+      color: var(--accent-blue);
     }
 
     /* ========== TOAST CONTAINER ========== */
     .toast-container {
       position: fixed;
-      bottom: 30px;
+      top: 40px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 9999;
       pointer-events: none;
     }
 
+    /* ========== TOAST STYLES ========== */
     .toast {
       display: flex;
       align-items: center;
@@ -353,28 +393,78 @@
       padding: 18px 28px;
       border-radius: 20px;
       backdrop-filter: blur(20px);
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1);
       pointer-events: auto;
       cursor: pointer;
       min-width: 320px;
       max-width: 420px;
       font-weight: 600;
       font-size: 16px;
+      white-space: nowrap;
       border: 1px solid rgba(255, 255, 255, 0.3);
-      animation: slideInBottom 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      overflow: hidden;
+      transform-style: preserve-3d;
+      animation: slideInTop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      margin-bottom: 15px;
     }
 
+    /* ERROR TOAST */
     .toast.error {
       background: linear-gradient(135deg, rgba(255, 107, 107, 0.95) 0%, rgba(238, 90, 111, 0.95) 100%);
       color: white;
     }
 
+    .toast.error::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+      animation: shine 3s ease-in-out infinite;
+    }
+
+    .toast.error .icon {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+      border: 2.5px solid rgba(255, 255, 255, 0.6);
+      color: white;
+      box-shadow: 
+        0 8px 24px rgba(0, 0, 0, 0.25),
+        inset 0 1px 2px rgba(255, 255, 255, 0.4),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    /* SUCCESS TOAST */
     .toast.success {
       background: linear-gradient(135deg, rgba(38, 208, 206, 0.95) 0%, rgba(26, 188, 156, 0.95) 100%);
       color: white;
     }
 
-    .toast-icon {
+    .toast.success::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+      animation: shine 3s ease-in-out infinite;
+    }
+
+    .toast.success .icon {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+      border: 2.5px solid rgba(255, 255, 255, 0.6);
+      color: white;
+      box-shadow: 
+        0 8px 24px rgba(0, 0, 0, 0.25),
+        inset 0 1px 2px rgba(255, 255, 255, 0.4),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    /* ICON STYLES - 3D EFFECT */
+    .icon {
       width: 52px;
       height: 52px;
       border-radius: 50%;
@@ -382,149 +472,282 @@
       align-items: center;
       justify-content: center;
       font-size: 28px;
-      background: rgba(255, 255, 255, 0.3);
-      border: 2.5px solid rgba(255, 255, 255, 0.6);
+      font-weight: 700;
       flex-shrink: 0;
+      position: relative;
       animation: iconBounce3D 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transform-style: preserve-3d;
+    }
+
+    .icon::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.4), transparent 60%);
+      pointer-events: none;
+    }
+
+    /* TEXT */
+    .toast-text {
+      flex: 1;
+      text-align: left;
+      animation: textFadeIn 0.6s ease 0.15s both;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+    }
+
+    /* CLOSE BUTTON */
+    .toast-close {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 16px;
+      flex-shrink: 0;
+      opacity: 0;
+      animation: fadeIn 0.6s ease 0.2s both;
+    }
+
+    .toast:hover .toast-close {
+      background: rgba(255, 255, 255, 0.35);
+      transform: scale(1.1);
+    }
+
+    /* CONFETTI STYLES */
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      pointer-events: none;
+      z-index: 9998;
+    }
+
+        /* ========== ANIMATIONS ========== */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideInTop {
+      from {
+        opacity: 0;
+        transform: translateY(-40px) rotateX(20deg);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) rotateX(0deg);
+      }
     }
 
     @keyframes iconBounce3D {
       0% {
-        transform: scale(0.2) rotateZ(-30deg);
+        transform: scale(0.2) rotateZ(-30deg) rotateX(45deg);
         opacity: 0;
       }
       50% {
-        transform: scale(1.15) rotateZ(10deg);
+        transform: scale(1.15) rotateZ(10deg) rotateX(0deg);
       }
       100% {
-        transform: scale(1) rotateZ(0deg);
+        transform: scale(1) rotateZ(0deg) rotateX(0deg);
         opacity: 1;
       }
     }
 
-    @keyframes slideInBottom {
+    @keyframes textFadeIn {
       from {
         opacity: 0;
-        transform: translateY(40px);
+        transform: translateX(-10px);
       }
       to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes shine {
+      0%, 100% {
+        transform: translate(0, 0);
+      }
+      50% {
+        transform: translate(20px, 20px);
+      }
+    }
+
+    @keyframes fadeOut {
+      from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      to {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+      }
+    }
+
+    @keyframes confettiFall {
+      to {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
       }
     }
 
     .toast.removing {
-      animation: fadeOutBottom 0.4s cubic-bezier(0.4, 0, 1, 1) forwards;
-    }
-
-    @keyframes fadeOutBottom {
-      from {
-        opacity: 1;
-        transform: translateY(0);
-      }
-      to {
-        opacity: 0;
-        transform: translateY(20px);
-      }
+      animation: fadeOut 0.4s cubic-bezier(0.4, 0, 1, 1) forwards;
     }
 
     /* Responsive */
     @media (max-width: 600px) {
-      .login-container {
-        padding: 35px 25px;
-        border-radius: 24px;
-      }
-
-      h1 {
-        font-size: 26px;
-      }
-
-      .logo-icon {
-        width: 60px;
-        height: 60px;
-        font-size: 32px;
-      }
-
-      button {
-        font-size: 15px;
-        padding: 14px;
-      }
-
       .toast {
         min-width: 280px;
         max-width: 85vw;
         font-size: 15px;
         padding: 16px 20px;
+        gap: 12px;
+      }
+
+      .icon {
+        width: 48px;
+        height: 48px;
+        font-size: 24px;
+      }
+
+      .auth-card {
+        padding: 40px 30px;
+        max-width: 90%;
+      }
+
+      .logo {
+        font-size: 32px;
+      }
+
+      .mascot {
+        width: 80px;
+        height: 80px;
+        font-size: 50px;
+        bottom: 20px;
+        right: 20px;
+      }
+
+      .btn {
+        padding: 14px;
+        font-size: 15px;
+      }
+
+      input {
+        padding: 12px 45px 12px 40px;
+        font-size: 14px;
+      }
+
+      .links-section {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
       }
     }
   </style>
 </head>
-
 <body>
 
-  <!-- Toast Container -->
+  <div class="universe-bg"></div>
+  <div class="nebula"></div>
+  <canvas id="star-canvas"></canvas>
+
+  <!-- TOAST CONTAINER -->
   <div class="toast-container" id="toastContainer"></div>
 
-  <!-- Login Container -->
-  <div class="login-container">
-    <!-- Logo & Title -->
-    <div class="logo-section">
-      <div class="logo-icon">🎓</div>
-      <h1>Lenovox AI</h1>
-      <p class="subtitle">Smart Learning for Everyone</p>
-    </div>
+  <!-- MASCOT -->
+  <div class="mascot" id="mascot">👽</div>
 
-    <!-- Email Input -->
-    <div class="form-group">
-      <label for="loginEmail"><i class="fas fa-envelope"></i> Email Address</label>
+  <div class="logo-container">
+    <div class="logo">Lenovox-ai<span class="circle"></span></div>
+    <div class="typing-text" id="typingText"></div>
+  </div>
+
+  <div class="auth-card">
+    <h2>Welcome Back</h2>
+    <p class="subtitle-text">Log in to continue your learning journey</p>
+
+    <!-- EMAIL INPUT -->
+    <div class="input-group">
+      <label class="input-label"><i class="fas fa-envelope"></i> Email Address</label>
       <div class="input-wrapper">
-        <input id="loginEmail" type="email" placeholder="your@email.com">
+        <input type="email" id="loginEmail" placeholder="your@email.com" required />
+        <i class="fas fa-at"></i>
       </div>
       <div id="emailError" class="error-message"></div>
     </div>
 
-    <!-- Password Input -->
-    <div class="form-group">
-      <label for="loginPassword"><i class="fas fa-lock"></i> Password</label>
+    <!-- PASSWORD INPUT -->
+    <div class="input-group">
+      <label class="input-label"><i class="fas fa-lock"></i> Password</label>
       <div class="input-wrapper">
-        <input id="loginPassword" type="password" placeholder="Enter your password">
-        <i class="fas fa-eye password-toggle" id="passwordToggle" onclick="togglePassword()"></i>
+        <input type="password" id="loginPassword" placeholder="Enter your password" required />
+        <i class="fas fa-lock"></i>
+        <span class="password-toggle" id="togglePassword">
+          <i class="fas fa-eye"></i>
+        </span>
       </div>
       <div id="passwordError" class="error-message"></div>
     </div>
 
-    <!-- Login Button -->
-    <div class="button-group">
-      <button id="loginBtn">
+    <!-- BUTTONS -->
+    <div class="btn-group">
+      <button id="loginBtn" class="btn btn-login">
         <i class="fas fa-sign-in-alt"></i> Login
       </button>
-
-      <button id="googleLoginBtn">
-        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+      <button id="googleLoginBtn" class="btn btn-google">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="btn-icon" />
         Continue with Google
       </button>
     </div>
 
-    <!-- Forgot Password -->
-    <div class="forgot-section">
+    <!-- LINKS SECTION -->
+    <div class="links-section">
       <span class="forgot-link" id="forgotBtn">
         <i class="fas fa-key"></i> Forgot Password?
       </span>
-    </div>
-
-    <!-- Sign Up Link -->
-    <div class="signup-section">
-      <p>Don't have an account? <a href="signup.html" class="signup-link">Sign up here</a></p>
+      <a href="signup.html" class="signup-link">
+        <i class="fas fa-user-plus"></i> Sign Up
+      </a>
     </div>
   </div>
 
+  <!-- IMPORT MODULAR AUTH -->
   <script type="module">
+    // IMPORT FROM YOUR auth.js (FIREBASE)
     import { loginUser, googleLoginUser, resetPassword } from "./auth.js";
 
-    // ========== CONSTANTS ==========
-    const LOGIN_EXPIRY_DAYS = 7;
+    // UI ELEMENTS
+    const typingEl = document.getElementById("typingText");
+    const toastContainer = document.getElementById("toastContainer");
+    const emailInput = document.getElementById("loginEmail");
+    const passwordInput = document.getElementById("loginPassword");
+    const loginBtn = document.getElementById("loginBtn");
+    const googleLoginBtn = document.getElementById("googleLoginBtn");
+    const forgotBtn = document.getElementById("forgotBtn");
+    const togglePassword = document.getElementById("togglePassword");
+    const emailError = document.getElementById("emailError");
+    const passwordError = document.getElementById("passwordError");
+    const mascot = document.getElementById("mascot");
 
-    // ========== DETAILED ERROR MESSAGES ==========
+    // ERROR MESSAGES
     const errorMessages = {
       'invalid-email': 'Email format is wrong. Try: example@email.com',
       'user-not-found': 'No account found with this email. Did you sign up with a different email?',
@@ -541,39 +764,117 @@
       'default': 'Something went wrong. Please try again or contact support.'
     };
 
-    // ========== DOM ELEMENTS ==========
-    const emailInput = document.getElementById('loginEmail');
-    const passwordInput = document.getElementById('loginPassword');
-    const loginBtn = document.getElementById('loginBtn');
-    const googleLoginBtn = document.getElementById('googleLoginBtn');
-    const forgotBtn = document.getElementById('forgotBtn');
-    const passwordToggle = document.getElementById('passwordToggle');
-    const emailError = document.getElementById('emailError');
-    const passwordError = document.getElementById('passwordError');
+    // ========== TYPING EFFECT ==========
+    const words = [
+      "Welcome back!", "Ready to learn?", "Let's crush your goals!", "Your universe awaits 🌟"
+    ];
+    let wordIndex = 0, charIndex = 0, deleting = false;
+    function typeEffect() {
+      const currentWord = words[wordIndex];
+      if(!deleting){
+        typingEl.textContent = currentWord.slice(0, charIndex++);
+        if(charIndex > currentWord.length) setTimeout(()=>deleting=true,1500);
+      } else {
+        typingEl.textContent = currentWord.slice(0, charIndex--);
+        if(charIndex===0){ deleting=false; wordIndex=(wordIndex+1)%words.length; }
+      }
+      setTimeout(typeEffect, deleting?40:70);
+    }
+    typeEffect();
+
+    // ========== PASSWORD TOGGLE FUNCTIONALITY ==========
+    togglePassword.addEventListener('click', () => {
+      const icon = togglePassword.querySelector('i');
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+      } else {
+        passwordInput.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+      }
+    });
 
     // ========== TOAST NOTIFICATION SYSTEM ==========
-    function showToast(message, type = 'success', duration = 3000) {
-      const container = document.getElementById('toastContainer');
+    function createToast(message, type = 'success') {
       const toast = document.createElement('div');
       toast.className = `toast ${type}`;
 
-      const icon = type === 'success' ? '✓' : '✕';
-      toast.innerHTML = `
-        <div class="toast-icon">${icon}</div>
-        <div>${message}</div>
-      `;
+      const icon = document.createElement('div');
+      icon.className = 'icon';
+      icon.innerHTML = type === 'success' ? '✓' : '✕';
 
-      container.appendChild(toast);
+      const text = document.createElement('div');
+      text.className = 'toast-text';
+      text.textContent = message;
 
+      const closeBtn = document.createElement('div');
+      closeBtn.className = 'toast-close';
+      closeBtn.innerHTML = '×';
+      closeBtn.onclick = () => {
+        toast.classList.add('removing');
+        setTimeout(() => toast.remove(), 400);
+      };
+
+      toast.appendChild(icon);
+      toast.appendChild(text);
+      toast.appendChild(closeBtn);
+      toastContainer.appendChild(toast);
+
+      // Play sound effect
+      playNotificationSound();
+
+      // Auto remove after 5 seconds
       setTimeout(() => {
-        toast.classList.add('removing');
-        setTimeout(() => toast.remove(), 400);
-      }, duration);
+        if (toast.parentElement) {
+          toast.classList.add('removing');
+          setTimeout(() => toast.remove(), 400);
+        }
+      }, 5000);
+    }
 
-      toast.addEventListener('click', () => {
-        toast.classList.add('removing');
-        setTimeout(() => toast.remove(), 400);
-      });
+    // ========== SOUND EFFECTS ==========
+    function playNotificationSound() {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      oscillator.frequency.value = 800;
+      oscillator.type = 'sine';
+
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.1);
+    }
+
+    // ========== CONFETTI EFFECT ==========
+    function createConfetti() {
+      const confettiCount = 50;
+      for (let i = 0; i < confettiCount; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * window.innerWidth + 'px';
+        confetti.style.top = '-10px';
+        confetti.style.background = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#6c5ce7'][Math.floor(Math.random() * 5)];
+        confetti.style.animation = `confettiFall ${2 + Math.random() * 1}s linear forwards`;
+        document.body.appendChild(confetti);
+
+        setTimeout(() => confetti.remove(), 3000);
+      }
+    }
+
+    // ========== MASCOT REACTIONS ==========
+    function mascotReact() {
+      mascot.style.animation = 'none';
+      setTimeout(() => {
+        mascot.style.animation = 'mascotBounce 0.6s ease';
+      }, 10);
     }
 
     // ========== ERROR DISPLAY ==========
@@ -603,14 +904,6 @@
       return errorMessages['default'];
     }
 
-    // ========== PASSWORD TOGGLE ==========
-    window.togglePassword = function() {
-      const type = passwordInput.type === 'password' ? 'text' : 'password';
-      passwordInput.type = type;
-      passwordToggle.classList.toggle('fa-eye');
-      passwordToggle.classList.toggle('fa-eye-slash');
-    };
-
     // ========== LOGIN WITH EMAIL ==========
     loginBtn.addEventListener('click', async () => {
       clearErrors();
@@ -620,10 +913,12 @@
       // Validation
       if (!email) {
         showError('email', errorMessages['empty-email']);
+        mascotReact();
         return;
       }
       if (!password) {
         showError('password', errorMessages['empty-password']);
+        mascotReact();
         return;
       }
 
@@ -631,25 +926,28 @@
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
         showError('email', errorMessages['invalid-email']);
+        mascotReact();
         return;
       }
 
       loginBtn.disabled = true;
+      loginBtn.classList.add('loading');
       loginBtn.innerHTML = '<span class="spinner"></span> Logging in...';
 
       try {
         const result = await loginUser({ email, password });
         
-        // Check if login was successful
         if (result.success) {
-          showToast('Welcome back! Redirecting...', 'success', 2000);
+          createToast('Welcome back! Redirecting...', 'success');
+          createConfetti();
+          mascotReact();
           setTimeout(() => {
             window.location.href = 'appskeleton.html';
           }, 2000);
         } else {
-          // Handle error from auth.js
           const message = getErrorMessage(result.error);
-          showToast(message, 'error', 4500);
+          createToast(message, 'error');
+          mascotReact();
 
           if (result.error.includes('email') || result.error.includes('user-not-found')) {
             showError('email', message);
@@ -659,9 +957,11 @@
         }
       } catch (err) {
         const message = getErrorMessage(err.message);
-        showToast(message, 'error', 4500);
+        createToast(message, 'error');
+        mascotReact();
       } finally {
         loginBtn.disabled = false;
+        loginBtn.classList.remove('loading');
         loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
       }
     });
@@ -670,26 +970,32 @@
     googleLoginBtn.addEventListener('click', async () => {
       clearErrors();
       googleLoginBtn.disabled = true;
+      googleLoginBtn.classList.add('loading');
       googleLoginBtn.innerHTML = '<span class="spinner"></span> Connecting...';
 
       try {
         const result = await googleLoginUser();
         
         if (result.success) {
-          showToast('Google login successful!', 'success', 2000);
+          createToast('Google login successful! Redirecting...', 'success');
+          createConfetti();
+          mascotReact();
           setTimeout(() => {
             window.location.href = 'appskeleton.html';
           }, 2000);
         } else {
           const message = getErrorMessage(result.error);
-          showToast(message, 'error', 4000);
+          createToast(message, 'error');
+          mascotReact();
         }
       } catch (err) {
         const message = getErrorMessage(err.message);
-        showToast(message, 'error', 4000);
+        createToast(message, 'error');
+        mascotReact();
       } finally {
         googleLoginBtn.disabled = false;
-        googleLoginBtn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"> Continue with Google';
+        googleLoginBtn.classList.remove('loading');
+        googleLoginBtn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="btn-icon" /> Continue with Google';
       }
     });
 
@@ -700,7 +1006,8 @@
 
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
-        showToast(errorMessages['invalid-email'], 'error', 3500);
+        createToast(errorMessages['invalid-email'], 'error');
+        mascotReact();
         return;
       }
 
@@ -711,20 +1018,23 @@
         const result = await resetPassword(email);
         
         if (result.success) {
-          showToast('Check your email! We sent a password reset link.', 'success', 4000);
+          createToast('Check your email! We sent a password reset link.', 'success');
+          mascotReact();
         } else {
           const message = getErrorMessage(result.error);
-          showToast(message, 'error', 4000);
+          createToast(message, 'error');
+          mascotReact();
         }
       } catch (err) {
         const message = getErrorMessage(err.message);
-        showToast(message, 'error', 4000);
+        createToast(message, 'error');
+        mascotReact();
       } finally {
         forgotBtn.style.opacity = '1';
         forgotBtn.style.pointerEvents = 'auto';
       }
     });
-    
+
     // ========== REAL-TIME EMAIL VALIDATION ==========
     emailInput.addEventListener('blur', () => {
       const email = emailInput.value.trim();
@@ -738,16 +1048,43 @@
       }
     });
 
-    // ========== CLEAR ERROR ON FOCUS ==========
-    passwordInput.addEventListener('focus', () => {
-      passwordError.classList.remove('show');
-    });
+    // ========== STARFIELD BACKGROUND SCRIPT ==========
+    const canvas = document.getElementById('star-canvas');
+    const ctx = canvas.getContext('2d');
+    let stars = [];
 
-    // ========== ENTER KEY SUPPORT ==========
-    passwordInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') loginBtn.click();
-    });
+    function initStars() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      stars = [];
+      for (let i = 0; i < 100; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          size: Math.random() * 2,
+          opacity: Math.random(),
+          speed: Math.random() * 0.05
+        });
+      }
+    }
+
+    function drawStars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      stars.forEach(s => {
+        ctx.fillStyle = `rgba(255, 255, 255, ${s.opacity})`;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+        ctx.fill();
+        s.y -= s.speed;
+        if (s.y < 0) s.y = canvas.height;
+      });
+      requestAnimationFrame(drawStars);
+    }
+
+    window.onresize = initStars;
+    initStars();
+    drawStars();
+
   </script>
-
 </body>
-</html
+</html>
