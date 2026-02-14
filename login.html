@@ -520,46 +520,24 @@
 
   <script type="module">
     import { loginUser, googleLoginUser, resetPassword } from "./auth.js";
-    import { getSession, saveSession } from "./session.js";
 
     // ========== CONSTANTS ==========
     const LOGIN_EXPIRY_DAYS = 7;
 
     // ========== DETAILED ERROR MESSAGES ==========
     const errorMessages = {
-      // Email-related errors
       'invalid-email': 'Email format is wrong. Try: example@email.com',
       'user-not-found': 'No account found with this email. Did you sign up with a different email?',
       'empty-email': 'Please enter your email address.',
-      
-      // Password-related errors
       'wrong-password': 'Password is incorrect. Passwords are case-sensitive, so check CAPS LOCK!',
       'empty-password': 'Please enter your password.',
-      'weak-password': 'Password is too weak. Use at least 6 characters with letters and numbers.',
-      
-      // Account-related errors
       'user-disabled': 'This account has been disabled. Contact support@lenovox.ai for help.',
-      'email-already-in-use': 'This email is already registered. Try logging in or use a different email.',
-      'operation-not-allowed': 'This login method is not available. Try another way.',
-      
-      // Rate limiting
       'too-many-requests': 'Too many failed login attempts. Wait 15 minutes for security, then try again.',
-      'account-exists-with-different-credential': 'An account exists with this email but uses a different login method.',
-      
-      // Network/Connection errors
       'network-request-failed': 'No internet connection. Check your WiFi or mobile data and try again.',
-      'timeout': 'Request took too long. Check your internet and try again.',
-      'internal-error': 'Server error. Please try again in a moment.',
-      
-      // Firebase specific
       'auth/invalid-credential': 'Email or password is incorrect. Please check both.',
       'auth/user-not-found': 'No account found with this email.',
       'auth/wrong-password': 'Password is incorrect. Try again!',
       'auth/too-many-requests': 'Too many login attempts. Wait 15 minutes before trying again.',
-      'auth/user-disabled': 'This account has been disabled. Contact support for help.',
-      'auth/network-request-failed': 'Network error. Check your connection and try again.',
-      
-      // Default
       'default': 'Something went wrong. Please try again or contact support.'
     };
 
@@ -572,48 +550,6 @@
     const passwordToggle = document.getElementById('passwordToggle');
     const emailError = document.getElementById('emailError');
     const passwordError = document.getElementById('passwordError');
-
-    // ========== CHECK IF ALREADY LOGGED IN ==========
-    async function checkLogin() {
-      try {
-        const sessionData = await getSession();
-        if (sessionData && sessionData.uid && sessionData.timestamp) {
-          const now = Date.now();
-          const diffDays = (now - sessionData.timestamp) / (1000 * 60 * 60 * 24);
-          if (diffDays <= LOGIN_EXPIRY_DAYS) {
-            // Session is still valid - redirect to dashboard
-            window.location.href = 'appskeleton.html';
-          } else {
-            // Session expired - clear it and show login page
-            localStorage.removeItem('loginData');
-          }
-        }
-      } catch (err) {
-        console.error('Session check error:', err);
-      }
-    }
-    checkLogin();
-
-    // ========== SAVE LOGIN DATA ==========
-    async function saveLogin(user) {
-      const loginData = {
-        uid: user.uid,
-        email: user.email,
-        name: user.displayName || '',
-        photoURL: user.photoURL || '',
-        timestamp: Date.now()
-      };
-      
-      // Save to localStorage (backup)
-      localStorage.setItem('loginData', JSON.stringify(loginData));
-      
-      // Save to session.js
-      try {
-        await saveSession(loginData);
-      } catch (err) {
-        console.error('Error saving to session:', err);
-      }
-    }
 
     // ========== TOAST NOTIFICATION SYSTEM ==========
     function showToast(message, type = 'success', duration = 3000) {
@@ -658,12 +594,6 @@
     function getErrorMessage(errorCode) {
       if (!errorCode) return errorMessages['default'];
       
-      // Check if error code matches directly
-      if (errorMessages[errorCode]) {
-        return errorMessages[errorCode];
-      }
-      
-      // Check for partial matches
       for (const [key, message] of Object.entries(errorMessages)) {
         if (errorCode.includes(key) || key.includes(errorCode)) {
           return message;
@@ -709,28 +639,33 @@
 
       try {
         const result = await loginUser({ email, password });
-        await saveLogin(result.user);
-        showToast('Welcome back! Redirecting...', 'success', 2000);
-        setTimeout(() => {
-          window.location.href = 'appskeleton.html';
-        }, 2000);
-      } catch (err) {
-        const errorCode = err.code || err.message;
-        let message = getErrorMessage(errorCode);
         
-        // Show toast with error
-        showToast(message, 'error', 4500);
+        // Check if login was successful
+        if (result.success) {
+          showToast('Welcome back! Redirecting...', 'success', 2000);
+          setTimeout(() => {
+            window.location.href = 'appskeleton.html';
+          }, 2000);
+        } else {
+          // Handle error from auth.js
+          const message = getErrorMessage(result.error);
+          showToast(message, 'error', 4500);
 
-        // Show field-specific errors
-        if (errorCode.includes('email') || errorCode.includes('user-not-found') || errorCode.includes('invalid-email')) {
-          showError('email', message);
-        } else if (errorCode.includes('password') || errorCode.includes('wrong-password')) {
-          showError('password', message);
+          if (result.error.includes('email') || result.error.includes('user-not-found')) {
+            showError('email', message);
+          } else if (result.error.includes('password') || result.error.includes('wrong-password')) {
+            showError('password', message);
+          }
         }
+      } catch (err) {
+        const message = getErrorMessage(err.message);
+        showToast(message, 'error', 4500);
       } finally {
         loginBtn.disabled = false;
         loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
-    
+      }
+    });
+
     // ========== LOGIN WITH GOOGLE ==========
     googleLoginBtn.addEventListener('click', async () => {
       clearErrors();
@@ -739,19 +674,18 @@
 
       try {
         const result = await googleLoginUser();
-        await saveLogin(result.user);
-        showToast('Google login successful!', 'success', 2000);
-        setTimeout(() => {
-          window.location.href = 'appskeleton.html';
-        }, 2000);
-      } catch (err) {
-        const errorCode = err.code || err.message;
-        let message = getErrorMessage(errorCode);
         
-        if (err.message && err.message.includes('popup-closed')) {
-          message = 'Login popup was closed. Please try again.';
+        if (result.success) {
+          showToast('Google login successful!', 'success', 2000);
+          setTimeout(() => {
+            window.location.href = 'appskeleton.html';
+          }, 2000);
+        } else {
+          const message = getErrorMessage(result.error);
+          showToast(message, 'error', 4000);
         }
-        
+      } catch (err) {
+        const message = getErrorMessage(err.message);
         showToast(message, 'error', 4000);
       } finally {
         googleLoginBtn.disabled = false;
@@ -764,7 +698,6 @@
       const email = prompt('Enter your email address to reset your password:');
       if (!email) return;
 
-      // Validate email
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
         showToast(errorMessages['invalid-email'], 'error', 3500);
@@ -775,23 +708,23 @@
       forgotBtn.style.pointerEvents = 'none';
 
       try {
-        await resetPassword(email);
-        showToast('Check your email! We sent a password reset link. (Check spam folder too)', 'success', 4000);
-      } catch (err) {
-        const errorCode = err.code || err.message;
-        let message = getErrorMessage(errorCode);
+        const result = await resetPassword(email);
         
-        if (err.message && err.message.includes('user-not-found')) {
-          message = 'No account found with this email. Did you sign up with a different email?';
+        if (result.success) {
+          showToast('Check your email! We sent a password reset link.', 'success', 4000);
+        } else {
+          const message = getErrorMessage(result.error);
+          showToast(message, 'error', 4000);
         }
-        
+      } catch (err) {
+        const message = getErrorMessage(err.message);
         showToast(message, 'error', 4000);
       } finally {
         forgotBtn.style.opacity = '1';
         forgotBtn.style.pointerEvents = 'auto';
       }
     });
-
+    
     // ========== REAL-TIME EMAIL VALIDATION ==========
     emailInput.addEventListener('blur', () => {
       const email = emailInput.value.trim();
@@ -817,4 +750,4 @@
   </script>
 
 </body>
-</html>
+</html
