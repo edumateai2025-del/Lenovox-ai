@@ -49,18 +49,19 @@ export async function signUpUser({ email, password, fullName }) {
       await updateProfile(res.user, { displayName: fullName });
     }
 
-    await saveSession({
-      uid: res.user.uid,
+    // FIXED: Pass uid as first parameter, data object as second
+    await saveSession(res.user.uid, {
       email: res.user.email,
       name: fullName || res.user.displayName || "",
       photoURL: res.user.photoURL || "",
-      provider: "password"
+      provider: "password",
+      timestamp: Date.now()
     });
 
     return { success: true, user: res.user };
   } catch (error) {
     console.error("Signup Error:", error);
-    return { success: false, error: error.message };
+    return { success: false, error: error.code || error.message };
   }
 }
 
@@ -71,18 +72,19 @@ export async function loginUser({ email, password }) {
   try {
     const res = await signInWithEmailAndPassword(auth, email, password);
 
-    await saveSession({
-      uid: res.user.uid,
+    // FIXED: Pass uid as first parameter, data object as second
+    await saveSession(res.user.uid, {
       email: res.user.email,
       name: res.user.displayName || "",
       photoURL: res.user.photoURL || "",
-      provider: "password"
+      provider: "password",
+      timestamp: Date.now()
     });
 
     return { success: true, user: res.user };
   } catch (error) {
     console.error("Login Error:", error);
-    return { success: false, error: error.message };
+    return { success: false, error: error.code || error.message };
   }
 }
 
@@ -94,12 +96,13 @@ export async function googleLoginUser() {
     // Uses Popup instead of Redirect for professional UI
     const res = await signInWithPopup(auth, provider);
 
-    await saveSession({
-      uid: res.user.uid,
+    // FIXED: Pass uid as first parameter, data object as second
+    await saveSession(res.user.uid, {
       email: res.user.email,
       name: res.user.displayName || "",
       photoURL: res.user.photoURL || "",
-      provider: "google"
+      provider: "google",
+      timestamp: Date.now()
     });
 
     return { success: true, user: res.user, name: res.user.displayName };
@@ -109,7 +112,7 @@ export async function googleLoginUser() {
     if (error.code === 'auth/popup-closed-by-user') {
       return { success: false, error: "Login cancelled. Please try again." };
     }
-    return { success: false, error: error.message };
+    return { success: false, error: error.code || error.message };
   }
 }
 
@@ -121,7 +124,7 @@ export async function resetPassword(email) {
     await sendPasswordResetEmail(auth, email);
     return { success: true };
   } catch (error) {
-    return { success: false, error: error.message };
+    return { success: false, error: error.code || error.message };
   }
 }
 
@@ -132,13 +135,13 @@ export async function updateDisplayName(name) {
   if (!auth.currentUser) throw new Error("No user logged in");
   await updateProfile(auth.currentUser, { displayName: name });
 
-  // Refresh session after update
-  await saveSession({
-    uid: auth.currentUser.uid,
+  // FIXED: Pass uid as first parameter, data object as second
+  await saveSession(auth.currentUser.uid, {
     email: auth.currentUser.email,
     name: auth.currentUser.displayName || "",
     photoURL: auth.currentUser.photoURL || "",
-    provider: auth.currentUser.providerData[0]?.providerId || "password"
+    provider: auth.currentUser.providerData[0]?.providerId || "password",
+    timestamp: Date.now()
   });
 
   return { success: true };
@@ -148,9 +151,17 @@ export async function updateDisplayName(name) {
    LOGOUT
 ====================== */
 export async function logoutUser() {
-  await signOut(auth);
-  await clearSession();
-  return { success: true };
+  try {
+    await signOut(auth);
+    // FIXED: Pass current user's uid to clearSession
+    if (auth.currentUser) {
+      await clearSession(auth.currentUser.uid);
+    }
+    return { success: true };
+  } catch (error) {
+    console.error("Logout Error:", error);
+    return { success: false, error: error.code || error.message };
+  }
 }
 
 /* ======================
@@ -158,9 +169,16 @@ export async function logoutUser() {
 ====================== */
 export async function deleteUserAccount() {
   if (!auth.currentUser) throw new Error("No user logged in");
-  await deleteUser(auth.currentUser);
-  await clearSession();
-  return { success: true };
+  const uid = auth.currentUser.uid;
+  
+  try {
+    await deleteUser(auth.currentUser);
+    await clearSession(uid);
+    return { success: true };
+  } catch (error) {
+    console.error("Delete Account Error:", error);
+    return { success: false, error: error.code || error.message };
+  }
 }
 
 /* ======================
@@ -173,6 +191,14 @@ export function watchAuth(callback) {
 /* ======================
    GET CURRENT USER SESSION
 ====================== */
-export function getCurrentUser() {
-  return getSession(); // from session.js, includes 7-day check
+export async function getCurrentUser() {
+  if (!auth.currentUser) return null;
+  return await getSession(auth.currentUser.uid);
+}
+
+/* ======================
+   GET CURRENT USER FROM FIREBASE
+====================== */
+export function getCurrentFirebaseUser() {
+  return auth.currentUser;
 }
