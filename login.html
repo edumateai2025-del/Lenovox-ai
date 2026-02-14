@@ -520,22 +520,47 @@
 
   <script type="module">
     import { loginUser, googleLoginUser, resetPassword } from "./auth.js";
+    import { getSession, saveSession } from "./session.js";
 
     // ========== CONSTANTS ==========
     const LOGIN_EXPIRY_DAYS = 7;
 
-    // ========== KID-FRIENDLY ERROR MESSAGES ==========
+    // ========== DETAILED ERROR MESSAGES ==========
     const errorMessages = {
-      'invalid-email': '📧 Oops! That email doesn\'t look right. Please check and try again!',
-      'user-not-found': '🔍 We couldn\'t find an account with that email. Want to sign up?',
-      'wrong-password': '🔐 That password isn\'t quite right. Try again!',
-      'user-disabled': '⛔ This account has been disabled. Contact support for help.',
-      'too-many-requests': '⏰ Too many login attempts. Please wait a moment and try again.',
-      'network-request-failed': '🌐 Connection problem! Check your internet and try again.',
-      'auth/invalid-credential': '❌ Email or password is incorrect. Please try again!',
-      'empty-email': '📧 Please enter your email address!',
-      'empty-password': '🔐 Please enter your password!',
-      'default': '😕 Something went wrong. Please try again!'
+      // Email-related errors
+      'invalid-email': 'Email format is wrong. Try: example@email.com',
+      'user-not-found': 'No account found with this email. Did you sign up with a different email?',
+      'empty-email': 'Please enter your email address.',
+      
+      // Password-related errors
+      'wrong-password': 'Password is incorrect. Passwords are case-sensitive, so check CAPS LOCK!',
+      'empty-password': 'Please enter your password.',
+      'weak-password': 'Password is too weak. Use at least 6 characters with letters and numbers.',
+      
+      // Account-related errors
+      'user-disabled': 'This account has been disabled. Contact support@lenovox.ai for help.',
+      'email-already-in-use': 'This email is already registered. Try logging in or use a different email.',
+      'operation-not-allowed': 'This login method is not available. Try another way.',
+      
+      // Rate limiting
+      'too-many-requests': 'Too many failed login attempts. Wait 15 minutes for security, then try again.',
+      'account-exists-with-different-credential': 'An account exists with this email but uses a different login method.',
+      
+      // Network/Connection errors
+      'network-request-failed': 'No internet connection. Check your WiFi or mobile data and try again.',
+      'timeout': 'Request took too long. Check your internet and try again.',
+      'internal-error': 'Server error. Please try again in a moment.',
+      
+      // Firebase specific
+      'auth/invalid-credential': 'Email or password is incorrect. Please check both.',
+      'auth/user-not-found': 'No account found with this email.',
+      'auth/wrong-password': 'Password is incorrect. Try again!',
+      'auth/too-many-requests': 'Too many login attempts. Wait 15 minutes before trying again.',
+      'auth/user-disabled': 'This account has been disabled. Contact support for help.',
+      'auth/network-request-failed': 'Network error. Check your connection and try again.',
+      
+      // Default
+      'default': 'Something went wrong. Please try again or contact support.'
     };
 
     // ========== DOM ELEMENTS ==========
@@ -549,28 +574,45 @@
     const passwordError = document.getElementById('passwordError');
 
     // ========== CHECK IF ALREADY LOGGED IN ==========
-    function checkLogin() {
-      const loginData = JSON.parse(localStorage.getItem('loginData') || '{}');
-      if (loginData.uid && loginData.timestamp) {
-        const now = Date.now();
-        const diffDays = (now - loginData.timestamp) / (1000 * 60 * 60 * 24);
-        if (diffDays <= LOGIN_EXPIRY_DAYS) {
-          window.location.href = 'appskeleton.html';
-        } else {
-          localStorage.removeItem('loginData');
+    async function checkLogin() {
+      try {
+        const sessionData = await getSession();
+        if (sessionData && sessionData.uid && sessionData.timestamp) {
+          const now = Date.now();
+          const diffDays = (now - sessionData.timestamp) / (1000 * 60 * 60 * 24);
+          if (diffDays <= LOGIN_EXPIRY_DAYS) {
+            // Session is still valid - redirect to dashboard
+            window.location.href = 'appskeleton.html';
+          } else {
+            // Session expired - clear it and show login page
+            localStorage.removeItem('loginData');
+          }
         }
+      } catch (err) {
+        console.error('Session check error:', err);
       }
     }
     checkLogin();
 
     // ========== SAVE LOGIN DATA ==========
-    function saveLogin(user) {
-      localStorage.setItem('loginData', JSON.stringify({
+    async function saveLogin(user) {
+      const loginData = {
         uid: user.uid,
         email: user.email,
         name: user.displayName || '',
+        photoURL: user.photoURL || '',
         timestamp: Date.now()
-      }));
+      };
+      
+      // Save to localStorage (backup)
+      localStorage.setItem('loginData', JSON.stringify(loginData));
+      
+      // Save to session.js
+      try {
+        await saveSession(loginData);
+      } catch (err) {
+        console.error('Error saving to session:', err);
+      }
     }
 
     // ========== TOAST NOTIFICATION SYSTEM ==========
@@ -612,9 +654,23 @@
       passwordError.classList.remove('show');
     }
 
-    // ========== GET KID-FRIENDLY ERROR MESSAGE ==========
+    // ========== GET ERROR MESSAGE ==========
     function getErrorMessage(errorCode) {
-      return errorMessages[errorCode] || errorMessages['default'];
+      if (!errorCode) return errorMessages['default'];
+      
+      // Check if error code matches directly
+      if (errorMessages[errorCode]) {
+        return errorMessages[errorCode];
+      }
+      
+      // Check for partial matches
+      for (const [key, message] of Object.entries(errorMessages)) {
+        if (errorCode.includes(key) || key.includes(errorCode)) {
+          return message;
+        }
+      }
+      
+      return errorMessages['default'];
     }
 
     // ========== PASSWORD TOGGLE ==========
@@ -633,11 +689,18 @@
 
       // Validation
       if (!email) {
-        showError('email', getErrorMessage('empty-email'));
+        showError('email', errorMessages['empty-email']);
         return;
       }
       if (!password) {
-        showError('password', getErrorMessage('empty-password'));
+        showError('password', errorMessages['empty-password']);
+        return;
+      }
+
+      // Email format validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        showError('email', errorMessages['invalid-email']);
         return;
       }
 
@@ -646,18 +709,20 @@
 
       try {
         const result = await loginUser({ email, password });
-        saveLogin(result.user);
-        showToast('✨ Welcome back! Redirecting...', 'success', 2000);
+        await saveLogin(result.user);
+        showToast('Welcome back! Redirecting...', 'success', 2000);
         setTimeout(() => {
           window.location.href = 'appskeleton.html';
         }, 2000);
       } catch (err) {
         const errorCode = err.code || err.message;
-        const message = getErrorMessage(errorCode);
-        showToast(message, 'error', 3500);
+        let message = getErrorMessage(errorCode);
+        
+        // Show toast with error
+        showToast(message, 'error', 4500);
 
         // Show field-specific errors
-        if (errorCode.includes('email') || errorCode.includes('user-not-found')) {
+        if (errorCode.includes('email') || errorCode.includes('user-not-found') || errorCode.includes('invalid-email')) {
           showError('email', message);
         } else if (errorCode.includes('password') || errorCode.includes('wrong-password')) {
           showError('password', message);
@@ -665,9 +730,7 @@
       } finally {
         loginBtn.disabled = false;
         loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
-      }
-    });
-
+    
     // ========== LOGIN WITH GOOGLE ==========
     googleLoginBtn.addEventListener('click', async () => {
       clearErrors();
@@ -676,14 +739,20 @@
 
       try {
         const result = await googleLoginUser();
-        saveLogin(result.user);
-        showToast('🎉 Google login successful!', 'success', 2000);
+        await saveLogin(result.user);
+        showToast('Google login successful!', 'success', 2000);
         setTimeout(() => {
           window.location.href = 'appskeleton.html';
         }, 2000);
       } catch (err) {
-        const message = getErrorMessage(err.code || 'default');
-        showToast(message, 'error', 3500);
+        const errorCode = err.code || err.message;
+        let message = getErrorMessage(errorCode);
+        
+        if (err.message && err.message.includes('popup-closed')) {
+          message = 'Login popup was closed. Please try again.';
+        }
+        
+        showToast(message, 'error', 4000);
       } finally {
         googleLoginBtn.disabled = false;
         googleLoginBtn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"> Continue with Google';
@@ -692,22 +761,53 @@
 
     // ========== FORGOT PASSWORD ==========
     forgotBtn.addEventListener('click', async () => {
-      const email = prompt('📧 Enter your email address to reset your password:');
+      const email = prompt('Enter your email address to reset your password:');
       if (!email) return;
+
+      // Validate email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        showToast(errorMessages['invalid-email'], 'error', 3500);
+        return;
+      }
 
       forgotBtn.style.opacity = '0.5';
       forgotBtn.style.pointerEvents = 'none';
 
       try {
         await resetPassword(email);
-        showToast('📧 Check your email! We sent a password reset link.', 'success', 4000);
+        showToast('Check your email! We sent a password reset link. (Check spam folder too)', 'success', 4000);
       } catch (err) {
-        const message = getErrorMessage(err.code || 'default');
-        showToast(message, 'error', 3500);
+        const errorCode = err.code || err.message;
+        let message = getErrorMessage(errorCode);
+        
+        if (err.message && err.message.includes('user-not-found')) {
+          message = 'No account found with this email. Did you sign up with a different email?';
+        }
+        
+        showToast(message, 'error', 4000);
       } finally {
         forgotBtn.style.opacity = '1';
         forgotBtn.style.pointerEvents = 'auto';
       }
+    });
+
+    // ========== REAL-TIME EMAIL VALIDATION ==========
+    emailInput.addEventListener('blur', () => {
+      const email = emailInput.value.trim();
+      if (email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          showError('email', 'Email should include @ symbol. Example: student@email.com');
+        } else {
+          emailError.classList.remove('show');
+        }
+      }
+    });
+
+    // ========== CLEAR ERROR ON FOCUS ==========
+    passwordInput.addEventListener('focus', () => {
+      passwordError.classList.remove('show');
     });
 
     // ========== ENTER KEY SUPPORT ==========
