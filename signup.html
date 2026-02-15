@@ -338,6 +338,62 @@
       color: #fff;
     }
 
+    /* TERMS CHECKBOX STYLES */
+    .terms-container {
+      margin: 20px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 14px;
+      color: #aaa;
+      transition: 0.3s;
+    }
+
+    .checkbox-label:hover {
+      color: #fff;
+    }
+
+    .checkbox-label input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      padding: 0;
+      margin: 0;
+      cursor: pointer;
+      accent-color: var(--accent-blue);
+      border-radius: 4px;
+    }
+
+    .checkbox-label input[type="checkbox"]:hover {
+      accent-color: #00f2fe;
+    }
+
+    .policy-link {
+      color: var(--accent-blue);
+      text-decoration: none;
+      font-weight: 600;
+      transition: 0.3s;
+      border-bottom: 1px solid transparent;
+    }
+
+    .policy-link:hover {
+      border-bottom-color: var(--accent-blue);
+      color: #00f2fe;
+    }
+
+    .terms-error {
+      background: rgba(255, 107, 107, 0.1);
+      border-left: 3px solid #ff6b6b;
+      padding: 10px;
+      border-radius: 6px;
+    }
+
     /* ========== TOAST CONTAINER ========== */
     .toast-container {
       position: fixed;
@@ -477,7 +533,7 @@
       opacity: 0;
       animation: fadeIn 0.6s ease 0.2s both;
     }
-
+    
     .toast:hover .toast-close {
       background: rgba(255, 255, 255, 0.35);
       transform: scale(1.1);
@@ -627,12 +683,20 @@
         padding: 12px 45px 12px 40px;
         font-size: 14px;
       }
+
+      .checkbox-label {
+        font-size: 13px;
+      }
+
+      .checkbox-label input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+      }
     }
   </style>
 </head>
 <body>
 
-  
   <div class="universe-bg"></div>
   <div class="nebula"></div>
   <canvas id="star-canvas"></canvas>
@@ -689,6 +753,26 @@
             <i class="fas fa-eye"></i>
           </span>
         </div>
+
+        <!-- TERMS, PRIVACY & CONDITIONS CHECKBOXES -->
+        <div class="terms-container">
+          <label class="checkbox-label">
+            <input type="checkbox" id="acceptTerms" required />
+            <span>I accept the <a href="terms.html" target="_blank" class="policy-link">Terms & Conditions</a></span>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="acceptPrivacy" required />
+            <span>I accept the <a href="privacy.html" target="_blank" class="policy-link">Privacy Policy</a></span>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="acceptPolicy" required />
+            <span>I accept the <a href="terms.html" target="_blank" class="policy-link">Terms & Conditions</a></span>
+          </label>
+          <div class="terms-error" id="termsError" style="display: none; color: #ff6b6b; font-size: 13px; margin-top: 10px;">
+            <i class="fas fa-exclamation-circle"></i> You must accept all terms to continue
+          </div>
+        </div>
+
         <button type="submit" class="btn btn-submit" id="submitBtn">Create Account</button>
       </form>
       <div class="back-link" id="backBtn">← Go Back</div>
@@ -855,15 +939,26 @@
     // ========== SIGNUP LOGIC (FIREBASE) ==========
     signupForm.onsubmit = async (e) => {
       e.preventDefault();
-      
-      const fullName = document.getElementById("fullName").value;
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      const confirmPassword = document.getElementById("confirmPassword").value;
+      const fullName = document.getElementById('fullName').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const acceptTerms = document.getElementById('acceptTerms').checked;
+      const acceptPrivacy = document.getElementById('acceptPrivacy').checked;
+      const acceptPolicy = document.getElementById('acceptPolicy').checked;
+      const termsError = document.getElementById('termsError');
 
-      // Validate passwords match
+      if (!acceptTerms || !acceptPrivacy || !acceptPolicy) {
+        termsError.style.display = 'block';
+        createToast('You must accept all terms to continue', 'error');
+        mascotReact();
+        return;
+      } else {
+        termsError.style.display = 'none';
+      }
+
       if(password !== confirmPassword) {
-        createToast("Passwords do not match!", 'error');
+        createToast('Passwords do not match!', 'error');
         mascotReact();
         return;
       }
@@ -988,5 +1083,4 @@
 
   </script>
 </body>
-        </html>
-        
+</html>
